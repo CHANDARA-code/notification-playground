@@ -6,6 +6,7 @@ export interface SendNotificationPayload {
   title: string;
   body: string;
   icon?: string;
+  left_icon_url?: string;
   imageUrl?: string;
   data?: Record<string, string | number | boolean>;
 }

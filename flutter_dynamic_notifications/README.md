@@ -2,7 +2,8 @@
 
 This sample shows **data-only** FCM pushes and uses `flutter_local_notifications` to display
 notifications with a **dynamic Android small icon** chosen from a whitelist. It also ships
-with a built-in **playground UI** to craft payloads and send a test push to the device.
+with a built-in **playground UI** to craft payloads and send a test push to the device. A
+local history of sends is stored in `shared_preferences`.
 
 ## 1) Firebase setup
 - Add `google-services.json` and `GoogleService-Info.plist` to your app.
@@ -41,6 +42,7 @@ The app expects data keys:
 - `title`
 - `body`
 - `icon` (Android small icon name)
+- `left_icon_url` (optional; large icon image URL)
 - `imageUrl` (optional; shows a big picture)
 
 Example data payload:
@@ -49,7 +51,8 @@ Example data payload:
 {
   "title": "Sale now live",
   "body": "Tap to view the deal",
-  "icon": "ic_notif_sale",
+  "icon": "ic_notif_default",
+  "left_icon_url": "https://example.com/icon.png",
   "imageUrl": "https://example.com/banner.png"
 }
 ```
@@ -58,6 +61,7 @@ Example data payload:
 - iOS does not support changing the small icon. The code still shows a local
   notification with title/body.
 - Data-only messages are used so Flutter can fully customize the notification.
+- Android small icon must be bundled; this project uses `ic_notif_default` by default.
 
 ## Integration test
 ```

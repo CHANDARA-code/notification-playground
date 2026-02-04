@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { NotificationsService, SendNotificationInput } from '@notifications/notifications.service';
 
@@ -7,6 +7,9 @@ interface SendNotificationBody {
   title?: string;
   body?: string;
   icon?: string;
+  iconUrl?: string;
+  leftIconUrl?: string;
+  left_icon_url?: string;
   imageUrl?: string;
   data?: Record<string, string | number | boolean>;
 }
@@ -17,6 +20,19 @@ export class NotificationsController {
 
   @Post('send')
   async send(@Body() body: SendNotificationBody) {
-    return this.notificationsService.send(body as SendNotificationInput);
+    const leftIconUrl =
+      body.leftIconUrl ?? body.left_icon_url ?? body.iconUrl ?? undefined;
+    return this.notificationsService.send({
+      ...(body as SendNotificationInput),
+      leftIconUrl,
+    });
+  }
+
+  @Get('history')
+  async history(@Query('limit') limit?: string) {
+    const parsed = limit ? Number(limit) : undefined;
+    return this.notificationsService.history(
+      Number.isFinite(parsed) ? (parsed as number) : 50,
+    );
   }
 }

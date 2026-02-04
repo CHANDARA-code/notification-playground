@@ -13,7 +13,8 @@ curl -X POST http://localhost:3000/notifications/send \
     "token": "FCM_TOKEN",
     "title": "Sale now live",
     "body": "Tap to view the deal",
-    "icon": "ic_notif_sale",
+    "icon": "ic_notif_default",
+    "left_icon_url": "https://example.com/icon.png",
     "imageUrl": "https://example.com/banner.png",
     "data": {
       "screen": "promo"

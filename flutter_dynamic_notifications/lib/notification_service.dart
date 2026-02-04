@@ -80,9 +80,12 @@ class NotificationService {
     if (title == null || title.isEmpty) return;
 
     final iconName = _resolveSmallIcon(_stringValue(data['icon']));
+    final leftIconUrl = _stringValue(data['left_icon_url']) ??
+        _stringValue(data['iconUrl']);
     final imageUrl = _stringValue(data['imageUrl']);
 
-    final bigPicture = await _downloadBigPicture(imageUrl);
+    final largeIcon = await _downloadBitmap(leftIconUrl);
+    final bigPicture = await _downloadBitmap(imageUrl);
 
     final androidDetails = AndroidNotificationDetails(
       _channelId,
@@ -91,12 +94,12 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       icon: iconName,
-      largeIcon: bigPicture,
+      largeIcon: largeIcon ?? bigPicture,
       styleInformation: bigPicture == null
           ? null
           : BigPictureStyleInformation(
               bigPicture,
-              largeIcon: bigPicture,
+              largeIcon: largeIcon ?? bigPicture,
               contentTitle: title,
               summaryText: body,
             ),
@@ -150,6 +153,7 @@ class NotificationService {
     required String title,
     required String body,
     String? icon,
+    String? leftIconUrl,
     String? imageUrl,
     Map<String, dynamic>? data,
   }) async {
@@ -159,6 +163,7 @@ class NotificationService {
       'title': title,
       'body': body,
       if (icon != null) 'icon': icon,
+      if (leftIconUrl != null) 'left_icon_url': leftIconUrl,
       if (imageUrl != null) 'imageUrl': imageUrl,
       if (data != null) 'data': data,
     });
@@ -180,7 +185,7 @@ class NotificationService {
     return value.toString();
   }
 
-  Future<ByteArrayAndroidBitmap?> _downloadBigPicture(String? url) async {
+  Future<ByteArrayAndroidBitmap?> _downloadBitmap(String? url) async {
     if (url == null || url.isEmpty) return null;
 
     final bytes = await _downloadBytes(url);

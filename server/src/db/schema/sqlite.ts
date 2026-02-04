@@ -23,4 +23,22 @@ export const devices = sqliteTable(
   }),
 );
 
-export const schema = { devices };
+export const notifications = sqliteTable('notifications', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  token: text('token').notNull(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  icon: text('icon'),
+  iconUrl: text('icon_url'),
+  leftIconUrl: text('left_icon_url'),
+  imageUrl: text('image_url'),
+  data: text('data'),
+  status: text('status').notNull().default('sent'),
+  messageId: text('message_id'),
+  error: text('error'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .defaultNow(),
+});
+
+export const schema = { devices, notifications };

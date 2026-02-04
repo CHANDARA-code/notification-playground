@@ -16,3 +16,7 @@ export function getSchema(): SchemaModule {
 export function getDevicesTable() {
   return getSchema().devices;
 }
+
+export function getNotificationsTable() {
+  return getSchema().notifications;
+}

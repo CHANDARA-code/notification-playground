@@ -1,0 +1,39 @@
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Node
+**/node_modules/
+**/.npm/
+**/.yarn/
+**/dist/
+**/build/
+**/.env
+**/.env.*
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/build/
+**/android/.gradle/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# iOS / macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/.last_build_id
+**/macos/Flutter/ephemeral/
+
+# Android signing
+**/android/key.properties
+**/android/app/*.jks
+
+# Logs
+*.log

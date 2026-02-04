@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'history_store.dart';
 import 'notification_service.dart';
 
 class PlaygroundScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
   final _tokenController = TextEditingController();
   final _titleController = TextEditingController(text: 'Sale now live');
   final _bodyController = TextEditingController(text: 'Tap to view the deal');
+  final _leftIconUrlController = TextEditingController();
   final _imageUrlController = TextEditingController(
     text:
         'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80',
@@ -28,28 +31,88 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
     }),
   );
 
-  String _icon = 'ic_notif_sale';
+  final String _icon = 'ic_notif_default';
   bool _sending = false;
   String? _status;
   String? _error;
   Map<String, dynamic>? _lastResponse;
+  final _historyStore = PushHistoryStore();
+  List<PushHistoryEntry> _history = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
 
   @override
   void dispose() {
     _tokenController.dispose();
     _titleController.dispose();
     _bodyController.dispose();
+    _leftIconUrlController.dispose();
     _imageUrlController.dispose();
     _dataController.dispose();
     super.dispose();
   }
 
+  Future<void> _loadHistory() async {
+    final entries = await _historyStore.load();
+    if (!mounted) return;
+    setState(() {
+      _history = entries;
+    });
+  }
+
+  Future<void> _saveHistory({
+    required String status,
+    String? messageId,
+    String? error,
+  }) async {
+    final entry = PushHistoryEntry(
+      title: _titleController.text.trim(),
+      body: _bodyController.text.trim(),
+      status: status,
+      timestamp: DateTime.now(),
+      icon: _icon,
+      iconUrl: _leftIconUrlController.text.trim().isEmpty
+          ? null
+          : _leftIconUrlController.text.trim(),
+      leftIconUrl: _leftIconUrlController.text.trim().isEmpty
+          ? null
+          : _leftIconUrlController.text.trim(),
+      imageUrl: _imageUrlController.text.trim().isEmpty
+          ? null
+          : _imageUrlController.text.trim(),
+      messageId: messageId,
+      error: error,
+    );
+    await _historyStore.add(entry);
+    await _loadHistory();
+  }
+
   Future<void> _loadToken() async {
     final token = await NotificationService.instance.fetchToken();
     if (!mounted) return;
+    if (token == null || token.isEmpty) {
+      setState(() {
+        _error =
+            'FCM token is not available. Check Firebase config and permissions.';
+      });
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: token));
     setState(() {
-      _tokenController.text = token ?? '';
+      _tokenController.text = token;
+      _status = 'Token loaded & copied.';
+      _error = null;
     });
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('FCM token copied to clipboard')),
+    );
   }
 
   Future<void> _send() async {
@@ -62,6 +125,7 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
     final token = _tokenController.text.trim();
     final title = _titleController.text.trim();
     final body = _bodyController.text.trim();
+    final leftIconUrl = _leftIconUrlController.text.trim();
     final imageUrl = _imageUrlController.text.trim();
     final rawData = _dataController.text.trim();
 
@@ -100,6 +164,7 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
         title: title,
         body: body,
         icon: _icon,
+        leftIconUrl: leftIconUrl.isEmpty ? null : leftIconUrl,
         imageUrl: imageUrl.isEmpty ? null : imageUrl,
         data: data,
       );
@@ -110,6 +175,10 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
         _status = 'Delivered to FCM.';
         _lastResponse = response;
       });
+      await _saveHistory(
+        status: 'sent',
+        messageId: response?['messageId']?.toString(),
+      );
     } catch (err) {
       if (!mounted) return;
       setState(() {
@@ -117,6 +186,7 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
         _status = null;
         _error = err.toString();
       });
+      await _saveHistory(status: 'error', error: err.toString());
     }
   }
 
@@ -180,36 +250,17 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _icon,
+                Text(
+                  'Small icon is fixed to ic_notif_default (Android requirement).',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _leftIconUrlController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Icon',
+                    labelText: 'Left icon URL (large icon)',
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'ic_notif_default',
-                      child: Text('ic_notif_default'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ic_notif_sale',
-                      child: Text('ic_notif_sale'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ic_notif_chat',
-                      child: Text('ic_notif_chat'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ic_notif_alert',
-                      child: Text('ic_notif_alert'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() {
-                      _icon = value;
-                    });
-                  },
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -269,6 +320,31 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
+          ),
+          const SizedBox(height: 20),
+          _Section(
+            title: 'History (local)',
+            child: _history.isEmpty
+                ? const Text('No history yet.')
+                : Column(
+                    children: _history
+                        .take(10)
+                        .map(
+                          (entry) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              entry.title,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            subtitle: Text(
+                              '${entry.status} • ${entry.timestamp.toLocal()}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
           ),
         ],
       ),

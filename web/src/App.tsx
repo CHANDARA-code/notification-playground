@@ -18,7 +18,8 @@ export default function App() {
   const [token, setToken] = useState('');
   const [title, setTitle] = useState('Sale now live');
   const [body, setBody] = useState('Tap to view the deal');
-  const [icon, setIcon] = useState(iconOptions[1]);
+  const [icon, setIcon] = useState(iconOptions[0]);
+  const [leftIconUrl, setLeftIconUrl] = useState('');
   const [imageUrl, setImageUrl] = useState(
     'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80',
   );
@@ -42,6 +43,7 @@ export default function App() {
     title,
     body,
     icon,
+    left_icon_url: leftIconUrl,
     imageUrl,
     data: parsedData ?? {},
   };
@@ -79,6 +81,7 @@ export default function App() {
         title,
         body,
         icon,
+        left_icon_url: leftIconUrl.trim() ? leftIconUrl : undefined,
         imageUrl: imageUrl.trim() ? imageUrl : undefined,
         data,
       });
@@ -106,7 +109,7 @@ export default function App() {
         </p>
       </header>
 
-      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[40%_60%]">
         <section className="glass rounded-3xl p-6 shadow-glow">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">Payload</h2>
@@ -142,7 +145,7 @@ export default function App() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Icon" hint="Android drawable name">
+              <Field label="Small icon" hint="Must be a bundled drawable">
                 <select
                   value={icon}
                   onChange={(event) => setIcon(event.target.value)}
@@ -155,14 +158,21 @@ export default function App() {
                   ))}
                 </select>
               </Field>
-              <Field label="Image URL" hint="Optional big picture">
+              <Field label="Left icon URL" hint="Large icon image (URL)">
                 <input
-                  value={imageUrl}
-                  onChange={(event) => setImageUrl(event.target.value)}
+                  value={leftIconUrl}
+                  onChange={(event) => setLeftIconUrl(event.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-ink-800 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
                 />
               </Field>
             </div>
+            <Field label="Image URL" hint="Optional big picture">
+              <input
+                value={imageUrl}
+                onChange={(event) => setImageUrl(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-ink-800 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
+              />
+            </Field>
 
             <Field label="Custom data (JSON)">
               <textarea
