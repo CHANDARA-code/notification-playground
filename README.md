@@ -10,7 +10,9 @@ This repo contains:
 curl -X POST http://localhost:3000/notifications/send \
   -H "Content-Type: application/json" \
   -d '{
-    "token": "FCM_TOKEN",
+    "topics": ["ahaha", "test", "all"],
+    "androidPriority": "high",
+    "apnsPriority": "normal",
     "title": "Sale now live",
     "body": "Tap to view the deal",
     "icon": "ic_notif_default",

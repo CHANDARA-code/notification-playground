@@ -17,6 +17,7 @@
       "@devices/*": ["src/devices/*"],
       "@notifications/*": ["src/notifications/*"],
       "@firebase/*": ["src/firebase/*"],
+      "@config/*": ["src/config/*"],
       "@model/*": ["src/db/schema/*"]
     }
   },

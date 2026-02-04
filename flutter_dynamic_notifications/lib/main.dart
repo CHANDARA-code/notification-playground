@@ -28,6 +28,7 @@ Future<void> main() async {
   );
 
   await NotificationService.instance.registerDeviceToken(kApiBaseUrl);
+  await NotificationService.instance.syncRemoteConfig(kApiBaseUrl);
   FirebaseMessaging.instance.onTokenRefresh.listen(
     (token) => NotificationService.instance.registerDeviceToken(
       kApiBaseUrl,

@@ -27,3 +27,9 @@ E2E:
 npm run build
 npm run e2e
 ```
+
+## Remote config
+The left panel lets admins create, update, activate, and delete config profiles
+(`GET /configs`). Each profile can store multiple topics (comma separated) and
+per-platform priority (Android/iOS). Flutter fetches `GET /config` on startup to
+subscribe to the active topics.

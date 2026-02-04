@@ -4,6 +4,13 @@ Endpoints:
 - `POST /devices/register`
 - `POST /notifications/send`
 - `GET /notifications/history`
+- `GET /config` (active config)
+- `PUT /config` (update active config)
+- `GET /configs`
+- `POST /configs`
+- `PUT /configs/:id`
+- `DELETE /configs/:id`
+- `POST /configs/:id/activate`
 - Swagger UI: `GET /docs`
 
 ## Environment variables
@@ -57,6 +64,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS devices_token_idx ON devices(token);
 CREATE TABLE IF NOT EXISTS notifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   token TEXT NOT NULL,
+  topic TEXT,
+  topics TEXT,
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   icon TEXT,
@@ -65,9 +74,25 @@ CREATE TABLE IF NOT EXISTS notifications (
   image_url TEXT,
   data TEXT,
   status TEXT NOT NULL DEFAULT 'sent',
+  priority TEXT NOT NULL DEFAULT 'high',
+  android_priority TEXT NOT NULL DEFAULT 'high',
+  apns_priority TEXT NOT NULL DEFAULT 'high',
   message_id TEXT,
   error TEXT,
   created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+);
+
+CREATE TABLE IF NOT EXISTS push_configs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  topic TEXT,
+  priority TEXT NOT NULL DEFAULT 'high',
+  topics TEXT,
+  android_priority TEXT NOT NULL DEFAULT 'high',
+  apns_priority TEXT NOT NULL DEFAULT 'high',
+  is_active INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+  updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
 );
 ```
 
@@ -85,7 +110,9 @@ POST /devices/register
 ```
 POST /notifications/send
 {
-  "token": "FCM_TOKEN",
+  "topics": ["ahaha", "test", "all"],
+  "androidPriority": "high",
+  "apnsPriority": "normal",
   "title": "Sale now live",
   "body": "Tap to view the deal",
   "icon": "ic_notif_default",
@@ -97,7 +124,30 @@ POST /notifications/send
 }
 ```
 
+### Update config
+```
+PUT /config
+{
+  "topics": ["ahaha", "test", "all"],
+  "androidPriority": "high",
+  "apnsPriority": "normal"
+}
+```
+
+### Create config
+```
+POST /configs
+{
+  "name": "Promo",
+  "topics": ["ahaha", "test", "all"],
+  "androidPriority": "high",
+  "apnsPriority": "normal"
+}
+```
+
 ## Notes
 - `icon` must match a bundled Android drawable in the Flutter app.
 - `left_icon_url` is used for the large icon (downloaded by Flutter at display time).
 - The server sends **data-only** messages so Flutter can render dynamic icons.
+- `topics` accepts a list or a comma-separated string. Special topics like `ios`,
+  `android`, and `all` can be used for targeting.

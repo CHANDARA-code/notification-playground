@@ -20,3 +20,7 @@ export function getDevicesTable() {
 export function getNotificationsTable() {
   return getSchema().notifications;
 }
+
+export function getPushConfigsTable() {
+  return getSchema().pushConfigs;
+}

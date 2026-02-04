@@ -4,6 +4,8 @@ This sample shows **data-only** FCM pushes and uses `flutter_local_notifications
 notifications with a **dynamic Android small icon** chosen from a whitelist. It also ships
 with a built-in **playground UI** to craft payloads and send a test push to the device. A
 local history of sends is stored in `shared_preferences`.
+The app also fetches **remote config** from the API to subscribe to one or more topics and
+store per-platform priorities.
 
 ## 1) Firebase setup
 - Add `google-services.json` and `GoogleService-Info.plist` to your app.
