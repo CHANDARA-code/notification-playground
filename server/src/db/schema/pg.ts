@@ -29,6 +29,8 @@ export const devices = pgTable(
 export const notifications = pgTable('notifications', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   token: varchar('token', { length: 255 }).notNull(),
+  topic: varchar('topic', { length: 200 }),
+  topics: varchar('topics', { length: 2000 }),
   title: varchar('title', { length: 200 }).notNull(),
   body: varchar('body', { length: 500 }).notNull(),
   icon: varchar('icon', { length: 100 }),
@@ -37,6 +39,13 @@ export const notifications = pgTable('notifications', {
   imageUrl: varchar('image_url', { length: 500 }),
   data: varchar('data', { length: 2000 }),
   status: varchar('status', { length: 20 }).notNull().default('sent'),
+  priority: varchar('priority', { length: 20 }).notNull().default('high'),
+  androidPriority: varchar('android_priority', { length: 20 })
+    .notNull()
+    .default('high'),
+  apnsPriority: varchar('apns_priority', { length: 20 })
+    .notNull()
+    .default('high'),
   messageId: varchar('message_id', { length: 255 }),
   error: varchar('error', { length: 500 }),
   createdAt: timestamp('created_at', { withTimezone: false })
@@ -44,4 +53,25 @@ export const notifications = pgTable('notifications', {
     .defaultNow(),
 });
 
-export const schema = { devices, notifications };
+export const pushConfigs = pgTable('push_configs', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar('name', { length: 120 }).notNull(),
+  topic: varchar('topic', { length: 200 }),
+  priority: varchar('priority', { length: 20 }).notNull().default('high'),
+  topics: varchar('topics', { length: 2000 }),
+  androidPriority: varchar('android_priority', { length: 20 })
+    .notNull()
+    .default('high'),
+  apnsPriority: varchar('apns_priority', { length: 20 })
+    .notNull()
+    .default('high'),
+  isActive: integer('is_active').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: false })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: false })
+    .notNull()
+    .defaultNow(),
+});
+
+export const schema = { devices, notifications, pushConfigs };

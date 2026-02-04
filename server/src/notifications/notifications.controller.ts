@@ -4,6 +4,11 @@ import { NotificationsService, SendNotificationInput } from '@notifications/noti
 
 interface SendNotificationBody {
   token?: string;
+  topic?: string;
+  topics?: string[] | string;
+  priority?: 'high' | 'normal';
+  androidPriority?: 'high' | 'normal';
+  apnsPriority?: 'high' | 'normal';
   title?: string;
   body?: string;
   icon?: string;
@@ -22,9 +27,11 @@ export class NotificationsController {
   async send(@Body() body: SendNotificationBody) {
     const leftIconUrl =
       body.leftIconUrl ?? body.left_icon_url ?? body.iconUrl ?? undefined;
+    const topics = normalizeTopics(body.topics ?? body.topic);
     return this.notificationsService.send({
       ...(body as SendNotificationInput),
       leftIconUrl,
+      topics,
     });
   }
 
@@ -35,4 +42,17 @@ export class NotificationsController {
       Number.isFinite(parsed) ? (parsed as number) : 50,
     );
   }
+}
+
+function normalizeTopics(input?: string[] | string) {
+  if (!input) return undefined;
+  if (Array.isArray(input)) {
+    return input
+      .map((topic) => topic.trim())
+      .filter((topic) => topic.length > 0);
+  }
+  return input
+    .split(',')
+    .map((topic) => topic.trim())
+    .filter((topic) => topic.length > 0);
 }

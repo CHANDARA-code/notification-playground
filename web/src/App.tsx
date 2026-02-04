@@ -1,6 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { apiBaseUrl, sendNotification } from '@lib/api';
+import {
+  activateConfig,
+  apiBaseUrl,
+  createConfig,
+  deleteConfig,
+  listConfigs,
+  sendNotification,
+  updateConfigById,
+} from '@lib/api';
 
 const iconOptions = [
   'ic_notif_default',
@@ -14,15 +22,39 @@ const presetData = {
   campaign: 'spring_launch',
 };
 
+type ConfigPriority = 'high' | 'normal';
+
+type PushConfig = {
+  id?: number;
+  name?: string;
+  topic?: string | null;
+  topics?: string[] | null;
+  priority?: ConfigPriority;
+  androidPriority?: ConfigPriority;
+  apnsPriority?: ConfigPriority;
+  isActive?: number;
+};
+
 export default function App() {
   const [token, setToken] = useState('');
   const [title, setTitle] = useState('Sale now live');
   const [body, setBody] = useState('Tap to view the deal');
   const [icon, setIcon] = useState(iconOptions[0]);
-  const [leftIconUrl, setLeftIconUrl] = useState('');
+  const [leftIconUrl, setLeftIconUrl] = useState(
+    'https://static.vecteezy.com/system/resources/thumbnails/048/942/306/small/dog-face-cartoon-icon-vector.jpg',
+  );
   const [imageUrl, setImageUrl] = useState(
     'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80',
   );
+  const [configName, setConfigName] = useState('');
+  const [configTopics, setConfigTopics] = useState('');
+  const [configAndroidPriority, setConfigAndroidPriority] =
+    useState<ConfigPriority>('high');
+  const [configApnsPriority, setConfigApnsPriority] =
+    useState<ConfigPriority>('high');
+  const [configStatus, setConfigStatus] = useState<string | null>(null);
+  const [configs, setConfigs] = useState<PushConfig[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [dataJson, setDataJson] = useState(
     JSON.stringify(presetData, null, 2),
   );
@@ -39,6 +71,11 @@ export default function App() {
     }
   }, [dataJson]);
 
+  const activeConfig = useMemo(
+    () => configs.find((config) => config.isActive === 1),
+    [configs],
+  );
+
   const preview = {
     title,
     body,
@@ -48,12 +85,128 @@ export default function App() {
     data: parsedData ?? {},
   };
 
+  const parseTopics = (value: string) =>
+    Array.from(
+      new Set(
+        value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0),
+      ),
+    );
+
+  const loadConfigs = async () => {
+    try {
+      const list = await listConfigs();
+      setConfigs(list);
+
+      if (!editingId) {
+        const active = list.find((item) => item.isActive === 1);
+        if (active) {
+          setConfigName(active.name ?? '');
+          const activeTopics =
+            active.topics && active.topics.length > 0
+              ? active.topics.join(', ')
+              : active.topic ?? '';
+          setConfigTopics(activeTopics);
+          setConfigAndroidPriority(active.androidPriority ?? active.priority ?? 'high');
+          setConfigApnsPriority(active.apnsPriority ?? active.priority ?? 'high');
+        }
+      }
+    } catch (err) {
+      setConfigStatus(
+        err instanceof Error ? err.message : 'Failed to load configs.',
+      );
+    }
+  };
+
+  useEffect(() => {
+    void loadConfigs();
+  }, []);
+
+  const handleSaveConfig = async () => {
+    setConfigStatus(null);
+    const topics = parseTopics(configTopics);
+    const payload = {
+      name: configName.trim() ? configName.trim() : 'Untitled',
+      topics: topics.length ? topics : null,
+      androidPriority: configAndroidPriority,
+      apnsPriority: configApnsPriority,
+    };
+
+    try {
+      if (editingId) {
+        await updateConfigById(editingId, payload);
+      } else {
+        await createConfig(payload);
+      }
+      setEditingId(null);
+      setConfigName('');
+      setConfigTopics('');
+      setConfigAndroidPriority('high');
+      setConfigApnsPriority('high');
+      await loadConfigs();
+      setConfigStatus('Config saved.');
+    } catch (err) {
+      setConfigStatus(
+        err instanceof Error ? err.message : 'Failed to save config.',
+      );
+    }
+  };
+
+  const handleEditConfig = (config: PushConfig) => {
+    setEditingId(config.id ?? null);
+    setConfigName(config.name ?? '');
+    const topics =
+      config.topics && config.topics.length > 0
+        ? config.topics.join(', ')
+        : config.topic ?? '';
+    setConfigTopics(topics);
+    setConfigAndroidPriority(config.androidPriority ?? config.priority ?? 'high');
+    setConfigApnsPriority(config.apnsPriority ?? config.priority ?? 'high');
+  };
+
+  const handleActivate = async (id?: number) => {
+    if (!id) return;
+    setConfigStatus(null);
+    try {
+      await activateConfig(id);
+      await loadConfigs();
+      setConfigStatus('Config activated.');
+    } catch (err) {
+      setConfigStatus(
+        err instanceof Error ? err.message : 'Failed to activate config.',
+      );
+    }
+  };
+
+  const handleDelete = async (id?: number) => {
+    if (!id) return;
+    setConfigStatus(null);
+    try {
+      await deleteConfig(id);
+      await loadConfigs();
+      setConfigStatus('Config deleted.');
+    } catch (err) {
+      setConfigStatus(
+        err instanceof Error ? err.message : 'Failed to delete config.',
+      );
+    }
+  };
+
   const handleSend = async () => {
     setError(null);
     setStatus('Sending...');
 
-    if (!token.trim()) {
-      setError('FCM token is required.');
+    const activeTopics =
+      activeConfig?.topics && activeConfig.topics.length > 0
+        ? activeConfig.topics
+        : activeConfig?.topic
+          ? [activeConfig.topic]
+          : [];
+
+    if (!token.trim() && activeTopics.length === 0) {
+      setError('FCM token or an active topic is required.');
       setStatus(null);
       return;
     }
@@ -77,7 +230,7 @@ export default function App() {
 
     try {
       const response = await sendNotification({
-        token,
+        token: token.trim() ? token : undefined,
         title,
         body,
         icon,
@@ -109,7 +262,7 @@ export default function App() {
         </p>
       </header>
 
-      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[40%_60%]">
+      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[70%_30%]">
         <section className="glass rounded-3xl p-6 shadow-glow">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">Payload</h2>
@@ -117,12 +270,154 @@ export default function App() {
           </div>
 
           <div className="mt-6 grid gap-5">
-            <Field label="FCM token" required>
+            <div className="rounded-2xl border border-white/10 bg-ink-800 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-haze-200">
+                Config manager
+              </p>
+              <div className="mt-4 grid gap-4">
+                <Field label="Name" hint="Config label">
+                  <input
+                    value={configName}
+                    onChange={(event) => setConfigName(event.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-ink-700 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
+                  />
+                </Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Topics" hint="Comma separated (e.g. ahaha, test, ios, android, all)">
+                    <input
+                      value={configTopics}
+                      onChange={(event) => setConfigTopics(event.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-ink-700 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
+                    />
+                  </Field>
+                  <Field label="Android priority" hint="FCM Android priority">
+                    <select
+                      value={configAndroidPriority}
+                      onChange={(event) =>
+                        setConfigAndroidPriority(
+                          event.target.value as ConfigPriority,
+                        )
+                      }
+                      className="w-full rounded-xl border border-white/10 bg-ink-700 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
+                    >
+                      <option value="high">high</option>
+                      <option value="normal">normal</option>
+                    </select>
+                  </Field>
+                  <Field label="iOS priority" hint="APNs priority">
+                    <select
+                      value={configApnsPriority}
+                      onChange={(event) =>
+                        setConfigApnsPriority(
+                          event.target.value as ConfigPriority,
+                        )
+                      }
+                      className="w-full rounded-xl border border-white/10 bg-ink-700 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
+                    >
+                      <option value="high">high</option>
+                      <option value="normal">normal</option>
+                    </select>
+                  </Field>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSaveConfig}
+                  className="inline-flex items-center justify-center rounded-xl bg-ink-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-ink-600"
+                >
+                  {editingId ? 'Update config' : 'Create config'}
+                </button>
+                {editingId ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingId(null);
+                      setConfigName('');
+                      setConfigTopics('');
+                      setConfigAndroidPriority('high');
+                      setConfigApnsPriority('high');
+                    }}
+                    className="inline-flex items-center justify-center rounded-xl border border-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/30"
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+                {configStatus ? (
+                  <span className="text-xs text-haze-200">{configStatus}</span>
+                ) : null}
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                {configs.length === 0 ? (
+                  <span className="text-xs text-haze-200">
+                    No configs yet.
+                  </span>
+                ) : (
+                  configs.map((config) => (
+                    <div
+                      key={config.id}
+                      className="rounded-2xl border border-white/10 bg-ink-700 px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          {config.name ?? 'Untitled'}
+                        </p>
+                        <p className="text-xs text-haze-200">
+                          Topics:{' '}
+                          {config.topics && config.topics.length > 0
+                            ? config.topics.join(', ')
+                            : config.topic || '—'}{' '}
+                          • Android:{' '}
+                          {config.androidPriority ??
+                            config.priority ??
+                            'high'}{' '}
+                          • iOS:{' '}
+                          {config.apnsPriority ?? config.priority ?? 'high'}
+                        </p>
+                      </div>
+                        {config.isActive === 1 ? (
+                          <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs text-accent-400">
+                            Active
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditConfig(config)}
+                          className="rounded-xl border border-white/10 px-3 py-1 text-xs text-white transition hover:border-white/30"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleActivate(config.id)}
+                          className="rounded-xl border border-white/10 px-3 py-1 text-xs text-white transition hover:border-white/30"
+                        >
+                          Activate
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(config.id)}
+                          className="rounded-xl border border-red-500/50 px-3 py-1 text-xs text-red-300 transition hover:border-red-400"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Field label="FCM token">
               <textarea
                 value={token}
                 onChange={(event) => setToken(event.target.value)}
                 rows={2}
-                placeholder="Paste the device token from Flutter"
+                placeholder="Optional if an active topic is set"
                 className="w-full rounded-xl border border-white/10 bg-ink-800 px-4 py-3 text-sm text-white outline-none focus:border-accent-400"
               />
             </Field>

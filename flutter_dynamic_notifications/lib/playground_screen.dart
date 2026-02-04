@@ -19,7 +19,10 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
   final _tokenController = TextEditingController();
   final _titleController = TextEditingController(text: 'Sale now live');
   final _bodyController = TextEditingController(text: 'Tap to view the deal');
-  final _leftIconUrlController = TextEditingController();
+  final _leftIconUrlController = TextEditingController(
+    text:
+        'https://static.vecteezy.com/system/resources/thumbnails/048/942/306/small/dog-face-cartoon-icon-vector.jpg',
+  );
   final _imageUrlController = TextEditingController(
     text:
         'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=80',
@@ -32,6 +35,8 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
   );
 
   final String _icon = 'ic_notif_default';
+  String _androidPriority = 'high';
+  String _apnsPriority = 'high';
   bool _sending = false;
   String? _status;
   String? _error;
@@ -166,6 +171,8 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
         icon: _icon,
         leftIconUrl: leftIconUrl.isEmpty ? null : leftIconUrl,
         imageUrl: imageUrl.isEmpty ? null : imageUrl,
+        androidPriority: _androidPriority,
+        apnsPriority: _apnsPriority,
         data: data,
       );
 
@@ -248,6 +255,62 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
                     border: OutlineInputBorder(),
                     labelText: 'Body',
                   ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _androidPriority,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Android priority',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'high',
+                            child: Text('high'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'normal',
+                            child: Text('normal'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() {
+                            _androidPriority = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _apnsPriority,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'iOS priority',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'high',
+                            child: Text('high'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'normal',
+                            child: Text('normal'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() {
+                            _apnsPriority = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Text(
