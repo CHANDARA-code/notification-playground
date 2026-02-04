@@ -1,0 +1,1 @@
+export const FIREBASE_MESSAGING = Symbol('FIREBASE_MESSAGING');
