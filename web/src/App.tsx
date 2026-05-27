@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   activateConfig,
@@ -80,6 +80,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastResponse, setLastResponse] = useState<object | null>(null);
   const [copiedCurl, setCopiedCurl] = useState<'api' | 'firebase' | null>(null);
+  const [hoveredCurl, setHoveredCurl] = useState<'api' | 'firebase' | null>(null);
+  const curlDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [simPlatform, setSimPlatform] = useState<'android' | 'ios'>('android');
 
   const HIST_PAGE_SIZE = 10;
@@ -420,6 +422,15 @@ export default function App() {
     });
   };
 
+  const openCurlPreview = (which: 'api' | 'firebase') => {
+    if (curlDismissTimer.current) clearTimeout(curlDismissTimer.current);
+    setHoveredCurl(which);
+  };
+
+  const scheduleCurlDismiss = () => {
+    curlDismissTimer.current = setTimeout(() => setHoveredCurl(null), 180);
+  };
+
   const handleSend = async () => {
     setError(null);
     setStatus('Sending...');
@@ -476,8 +487,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 text-tx-base md:px-12">
-      <header className="mx-auto max-w-6xl">
+    <div className="min-h-screen py-10 text-tx-base">
+      <header>
         <div className="flex items-center justify-between">
           <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
             Push Playground
@@ -509,7 +520,7 @@ export default function App() {
         </p>
       </header>
 
-      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[54%_46%]">
+      <main className="mt-10 grid gap-8 lg:grid-cols-[54fr_46fr]">
         <section className="glass rounded-3xl p-6 shadow-glow">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-tx-base">Payload</h2>
@@ -919,26 +930,90 @@ export default function App() {
             ) : null}
 
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => handleCopyCurl('api')}
-                className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong hover:text-tx-base"
+              {/* Copy cURL — Our API */}
+              <div
+                className="relative"
+                onMouseEnter={() => openCurlPreview('api')}
+                onMouseLeave={scheduleCurlDismiss}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {copiedCurl === 'api' ? 'Copied!' : 'Copy cURL — Our API'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleCopyCurl('firebase')}
-                className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong hover:text-tx-base"
+                {hoveredCurl === 'api' && (
+                  <div
+                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3 shadow-xl"
+                    onMouseEnter={() => openCurlPreview('api')}
+                    onMouseLeave={scheduleCurlDismiss}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-tx-muted">Our API</p>
+                      <button
+                        type="button"
+                        title="Close preview"
+                        onClick={() => setHoveredCurl(null)}
+                        className="flex h-5 w-5 items-center justify-center rounded-md text-tx-muted transition hover:bg-surface-hover hover:text-tx-base"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <pre className="max-h-[200px] overflow-auto whitespace-pre font-mono text-[10px] leading-relaxed text-tx-base">
+                      {buildOurApiCurl()}
+                    </pre>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleCopyCurl('api')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {copiedCurl === 'api' ? 'Copied!' : 'Copy cURL — Our API'}
+                </button>
+              </div>
+
+              {/* Copy cURL — Firebase Admin */}
+              <div
+                className="relative"
+                onMouseEnter={() => openCurlPreview('firebase')}
+                onMouseLeave={scheduleCurlDismiss}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {copiedCurl === 'firebase' ? 'Copied!' : 'Copy cURL — Firebase Admin'}
-              </button>
+                {hoveredCurl === 'firebase' && (
+                  <div
+                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3 shadow-xl"
+                    onMouseEnter={() => openCurlPreview('firebase')}
+                    onMouseLeave={scheduleCurlDismiss}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-tx-muted">Firebase Admin</p>
+                      <button
+                        type="button"
+                        title="Close preview"
+                        onClick={() => setHoveredCurl(null)}
+                        className="flex h-5 w-5 items-center justify-center rounded-md text-tx-muted transition hover:bg-surface-hover hover:text-tx-base"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <pre className="max-h-[200px] overflow-auto whitespace-pre font-mono text-[10px] leading-relaxed text-tx-base">
+                      {buildFirebaseCurl()}
+                    </pre>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleCopyCurl('firebase')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {copiedCurl === 'firebase' ? 'Copied!' : 'Copy cURL — Firebase Admin'}
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={handleSend}
@@ -950,7 +1025,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="glass rounded-3xl p-6">
+        <section className="glass overflow-hidden rounded-3xl p-6">
           {/* Platform tab switcher */}
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-tx-base">Simulator</h2>
@@ -960,14 +1035,14 @@ export default function App() {
                 onClick={() => setSimPlatform('android')}
                 className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'android' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
               >
-                Android
+                S26 Ultra
               </button>
               <button
                 type="button"
                 onClick={() => setSimPlatform('ios')}
                 className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'ios' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
               >
-                iOS
+                iPhone 17 Pro
               </button>
             </div>
           </div>
@@ -1004,7 +1079,7 @@ export default function App() {
       </main>
 
       {/* ── Notification History ─────────────────────────────────────────── */}
-      <section className="mx-auto mt-8 max-w-6xl pb-16">
+      <section className="mt-8 pb-16">
         <div className="glass rounded-3xl p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -1177,110 +1252,106 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreview
 
   return (
     <div className="sim-phone-frame mx-auto">
-      {/* Phone body */}
-      <div className="relative rounded-[2.8rem] bg-[#0a0a0a] p-[10px] shadow-2xl ring-1 ring-white/10">
-        {/* Volume / power buttons */}
-        <div className="absolute -left-[3px] top-[72px] h-7 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -left-[3px] top-[108px] h-10 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -left-[3px] top-[152px] h-10 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -right-[3px] top-[108px] h-14 w-[3px] rounded-r-sm bg-[#2a2a2a]" />
+      {/* Samsung Galaxy S26 Ultra — titanium flat frame, squared corners */}
+      <div className="relative rounded-[1.9rem] bg-[#1c1c1e] p-[6px] shadow-2xl ring-1 ring-white/10">
+        {/* Titanium frame inner edge highlight */}
+        <div className="pointer-events-none absolute inset-[3px] rounded-[1.5rem] ring-[0.5px] ring-white/8" />
+
+        {/* Left — volume down (single long key), volume up */}
+        <div className="absolute -left-[3.5px] top-[88px] h-8 w-[3.5px] rounded-l-[2px] bg-[#333]" />
+        <div className="absolute -left-[3.5px] top-[124px] h-[46px] w-[3.5px] rounded-l-[2px] bg-[#333]" />
+        <div className="absolute -left-[3.5px] top-[178px] h-[46px] w-[3.5px] rounded-l-[2px] bg-[#333]" />
+
+        {/* Right — power button */}
+        <div className="absolute -right-[3.5px] top-[130px] h-[52px] w-[3.5px] rounded-r-[2px] bg-[#333]" />
+
+        {/* S-Pen slot — thin raised strip on bottom-right edge */}
+        <div className="absolute -right-[4px] bottom-[22px] h-[70px] w-[4px] rounded-r-[1px] bg-[#0a0a0a]" />
+        <div className="absolute right-[1px] bottom-[22px] h-[70px] w-[2px] rounded-sm bg-[#262626]" />
+
+        {/* USB-C bottom center */}
+        <div className="absolute bottom-[1px] left-1/2 h-[5px] w-[22px] -translate-x-1/2 rounded-full bg-[#0a0a0a]" />
+        {/* Speaker grilles bottom */}
+        <div className="absolute bottom-[2px] left-[28px] flex gap-[2.5px]">
+          {[...Array(5)].map((_, i) => <div key={i} className="h-[3px] w-[3px] rounded-full bg-[#0a0a0a]" />)}
+        </div>
+        <div className="absolute bottom-[2px] right-[28px] flex gap-[2.5px]">
+          {[...Array(5)].map((_, i) => <div key={i} className="h-[3px] w-[3px] rounded-full bg-[#0a0a0a]" />)}
+        </div>
 
         {/* Screen */}
-        <div className="overflow-hidden rounded-[2.2rem] bg-[#121212]">
-          {/* Status bar */}
-          <div className="flex items-center justify-between bg-[#0d0d0d] px-5 py-2">
-            <span className="text-[11px] font-semibold text-white">12:00</span>
+        <div className="overflow-hidden rounded-[1.5rem] bg-[#000]">
+          {/* Status bar — centered punch-hole selfie camera */}
+          <div className="relative flex items-center justify-between bg-[#000] px-4 pt-3 pb-1.5">
+            <span className="text-[10px] font-medium text-white/90">12:00</span>
+            {/* Punch-hole — small centered dot */}
+            <div className="absolute left-1/2 top-[6px] h-[10px] w-[10px] -translate-x-1/2 rounded-full bg-[#0a0a0a] ring-[1.5px] ring-[#1a1a1a]" />
             <div className="flex items-center gap-[5px]">
-              {/* Signal bars */}
               <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="white" fillOpacity="0.5"/>
-                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="white" fillOpacity="0.7"/>
-                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="white" fillOpacity="0.9"/>
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="white" fillOpacity="0.45"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="white" fillOpacity="0.65"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="white" fillOpacity="0.85"/>
                 <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="white"/>
               </svg>
-              {/* WiFi */}
               <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
                 <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="white"/>
                 <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.6"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.55"/>
               </svg>
-              {/* Battery */}
               <div className="flex items-center gap-[2px]">
-                <div className="h-[9px] w-[16px] rounded-[2px] border border-white/60 p-[1.5px]">
+                <div className="h-[9px] w-[16px] rounded-[2px] border border-white/55 p-[1.5px]">
                   <div className="h-full w-[70%] rounded-[1px] bg-white" />
                 </div>
-                <div className="h-[5px] w-[2px] rounded-r-sm bg-white/60" />
+                <div className="h-[5px] w-[2px] rounded-r-sm bg-white/55" />
               </div>
             </div>
           </div>
 
-          {/* Notification shade area */}
-          <div className="min-h-[360px] bg-[#121212] px-3 py-2">
-            {/* Notification card — always dark (Android shade) */}
-            <div className="overflow-hidden rounded-[18px] bg-[#1e1e1e] shadow-lg">
-              {/* Card header */}
-              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1">
-                {/* Small mono icon */}
-                <div className="flex h-[14px] w-[14px] items-center justify-center rounded-[3px] bg-accent-500">
+          {/* One UI 7 notification shade — dark blurred wallpaper */}
+          <div className="min-h-[455px] bg-[#0d0d0d] px-2.5 py-2">
+            {/* One UI notification card — pill/rounded rectangle, frosted dark */}
+            <div className="overflow-hidden rounded-[22px] bg-[#1c1c1e] shadow-lg ring-[0.5px] ring-white/8">
+              {/* App row */}
+              <div className="flex items-center gap-1.5 px-3.5 pt-3 pb-1">
+                <div className="flex h-[15px] w-[15px] items-center justify-center rounded-[4px] bg-accent-500">
                   <span className="text-[6px] font-bold text-white leading-none">{iconLabel}</span>
                 </div>
-                <span className="flex-1 text-[10px] font-medium text-[#aaa]">Push App</span>
-                <span className="text-[9px] text-[#666]">Just now</span>
-                <span className="ml-1 text-[11px] text-[#555]">✕</span>
+                <span className="flex-1 text-[10px] font-semibold text-[#adadad]">Push App</span>
+                <span className="text-[9px] text-[#5a5a5a]">Just now</span>
+                <button type="button" className="ml-1 text-[11px] text-[#4a4a4a]">✕</button>
               </div>
-
-              {/* Card body */}
-              <div className="flex items-start gap-2 px-3 pb-3">
+              {/* Content row */}
+              <div className="flex items-start gap-2.5 px-3.5 pb-3.5">
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold leading-snug text-white line-clamp-1">
                     {title || 'Notification title'}
                   </p>
-                  <p className="mt-0.5 text-[12px] leading-snug text-[#999] line-clamp-2">
+                  <p className="mt-0.5 text-[12px] leading-snug text-[#8e8e8e] line-clamp-2">
                     {body || 'Notification body text'}
                   </p>
                 </div>
-                {/* Large icon (circular) */}
                 {leftIconUrl ? (
-                  <img
-                    src={leftIconUrl}
-                    alt=""
-                    className="h-[46px] w-[46px] flex-shrink-0 rounded-xl object-cover"
-                  />
+                  <img src={leftIconUrl} alt="" className="h-[48px] w-[48px] flex-shrink-0 rounded-[14px] object-cover" />
                 ) : (
-                  <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-xl bg-accent-500/20">
-                    <span className="text-[13px] font-bold text-accent-400">{iconLabel}</span>
+                  <div className="flex h-[48px] w-[48px] flex-shrink-0 items-center justify-center rounded-[14px] bg-accent-500/20">
+                    <span className="text-[14px] font-bold text-accent-400">{iconLabel}</span>
                   </div>
                 )}
               </div>
-
-              {/* Big picture (BigPictureStyle) */}
               {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt=""
-                  className="sim-bigpic w-full object-cover"
-                />
+                <img src={imageUrl} alt="" className="sim-bigpic w-full object-cover" />
               ) : null}
             </div>
-
-            {/* Subtle "swipe to dismiss" hint */}
-            <p className="mt-2 text-center text-[9px] text-[#444]">swipe to dismiss</p>
+            <p className="mt-2 text-center text-[8px] text-[#3a3a3a]">swipe to dismiss</p>
           </div>
 
-          {/* Nav bar */}
-          <div className="flex items-center justify-around bg-[#0d0d0d] px-8 py-2.5">
-            {/* Back */}
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 3L5 8l5 5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            {/* Home circle */}
-            <div className="h-4 w-4 rounded-full border border-[#666]" />
-            {/* Recents */}
-            <div className="h-3 w-3 rounded-[2px] border border-[#666]" />
+          {/* One UI gesture bar — no 3-button nav, just gesture line */}
+          <div className="flex justify-center bg-[#000] pb-2.5 pt-1.5">
+            <div className="h-[3.5px] w-[80px] rounded-full bg-white/20" />
           </div>
         </div>
       </div>
-      <p className="mt-2 text-center text-[10px] text-tx-muted">Android</p>
+      <p className="mt-2 text-center text-[10px] text-tx-muted">Samsung Galaxy S26 Ultra</p>
     </div>
   );
 }
@@ -1291,53 +1362,65 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
 
   return (
     <div className="sim-phone-frame mx-auto">
-      {/* Phone body */}
-      <div className="relative rounded-[3.2rem] bg-[#0a0a0a] p-[10px] shadow-2xl ring-1 ring-white/10">
-        {/* Silent switch + volume + power */}
-        <div className="absolute -left-[3px] top-[64px] h-5 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -left-[3px] top-[98px] h-9 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -left-[3px] top-[142px] h-9 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
-        <div className="absolute -right-[3px] top-[108px] h-14 w-[3px] rounded-r-sm bg-[#2a2a2a]" />
+      {/* iPhone 17 Pro Max — titanium flat-edge frame, large rounded corners */}
+      <div className="relative rounded-[3.2rem] bg-[#2c2c2e] p-[7px] shadow-2xl ring-1 ring-white/15">
+        {/* Titanium brushed highlight — top edge */}
+        <div className="pointer-events-none absolute inset-[4px] rounded-[2.8rem] ring-[0.5px] ring-white/10" />
 
-        {/* Screen — always light (iOS lock screen) */}
-        <div className="overflow-hidden rounded-[2.6rem] bg-[#f2f2f7]">
+        {/* Left — Action button (top, shorter), Volume Up, Volume Down */}
+        <div className="absolute -left-[3.5px] top-[68px] h-[18px] w-[3.5px] rounded-l-[2px] bg-[#3a3a3c]" />
+        <div className="absolute -left-[3.5px] top-[102px] h-[38px] w-[3.5px] rounded-l-[2px] bg-[#3a3a3c]" />
+        <div className="absolute -left-[3.5px] top-[148px] h-[38px] w-[3.5px] rounded-l-[2px] bg-[#3a3a3c]" />
+
+        {/* Right — Power button, Camera Control button (below power) */}
+        <div className="absolute -right-[3.5px] top-[110px] h-[52px] w-[3.5px] rounded-r-[2px] bg-[#3a3a3c]" />
+        <div className="absolute -right-[3.5px] top-[176px] h-[38px] w-[3.5px] rounded-r-[2px] bg-[#3a3a3c]" />
+
+        {/* USB-C bottom center */}
+        <div className="absolute bottom-[1.5px] left-1/2 h-[5px] w-[20px] -translate-x-1/2 rounded-full bg-[#111]" />
+        {/* Speaker grilles */}
+        <div className="absolute bottom-[2.5px] left-[30px] flex gap-[2.5px]">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-[3px] w-[3px] rounded-full bg-[#111]" />)}
+        </div>
+        <div className="absolute bottom-[2.5px] right-[30px] flex gap-[2.5px]">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-[3px] w-[3px] rounded-full bg-[#111]" />)}
+        </div>
+
+        {/* Screen — always iOS lock screen light */}
+        <div className="overflow-hidden rounded-[2.8rem] bg-[#f2f2f7]">
           {/* Status bar */}
-          <div className="relative flex items-center justify-between px-6 pb-1 pt-3">
-            <span className="text-[13px] font-semibold text-[#1c1c1e]">9:41</span>
-            {/* Dynamic Island */}
-            <div className="absolute left-1/2 top-2 h-[18px] w-[80px] -translate-x-1/2 rounded-full bg-black" />
-            <div className="flex items-center gap-1 text-[#1c1c1e]">
-              {/* Signal */}
+          <div className="relative flex items-center justify-between px-5 pb-1 pt-3.5">
+            <span className="text-[12px] font-semibold text-[#1c1c1e]">9:41</span>
+            {/* Dynamic Island — pill */}
+            <div className="absolute left-1/2 top-2 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-black shadow-lg" />
+            <div className="flex items-center gap-[4px]">
               <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="#1c1c1e" fillOpacity="0.4"/>
-                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="#1c1c1e" fillOpacity="0.6"/>
-                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="#1c1c1e" fillOpacity="0.8"/>
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="#1c1c1e" fillOpacity="0.35"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="#1c1c1e" fillOpacity="0.55"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="#1c1c1e" fillOpacity="0.75"/>
                 <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="#1c1c1e"/>
               </svg>
-              {/* WiFi */}
               <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
                 <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="#1c1c1e"/>
                 <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="#1c1c1e" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="#1c1c1e" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.5"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="#1c1c1e" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.45"/>
               </svg>
-              {/* Battery */}
               <div className="flex items-center gap-[2px]">
-                <div className="h-[9px] w-[16px] rounded-[2px] border border-[#1c1c1e]/60 p-[1.5px]">
+                <div className="h-[9px] w-[16px] rounded-[2px] border border-[#1c1c1e]/55 p-[1.5px]">
                   <div className="h-full w-[70%] rounded-[1px] bg-[#1c1c1e]" />
                 </div>
-                <div className="h-[5px] w-[2px] rounded-r-sm bg-[#1c1c1e]/50" />
+                <div className="h-[5px] w-[2px] rounded-r-sm bg-[#1c1c1e]/45" />
               </div>
             </div>
           </div>
 
-          {/* Lock screen content */}
-          <div className="min-h-[360px] bg-[#f2f2f7] px-3 py-3">
-            {/* iOS notification banner — frosted glass pill */}
-            <div className="sim-ios-notif overflow-hidden rounded-[18px] shadow-lg">
-              {/* App header row */}
-              <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">
-                {/* App icon */}
-                <div className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-[6px] bg-accent-500">
+          {/* Lock screen — subtle blurred wallpaper tint */}
+          <div className="min-h-[453px] bg-gradient-to-b from-[#dde4ef] to-[#eef2f8] px-3 py-3">
+            {/* iOS 18 notification banner — full-width frosted glass card */}
+            <div className="sim-ios-notif overflow-hidden rounded-[22px] shadow-xl">
+              {/* App header */}
+              <div className="flex items-center gap-2 px-3.5 pt-3 pb-1">
+                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded-[7px] bg-accent-500 shadow-sm">
                   <span className="text-[7px] font-bold text-white leading-none">{iconLabel}</span>
                 </div>
                 <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider text-[#8e8e93]">
@@ -1345,45 +1428,39 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
                 </span>
                 <span className="text-[10px] text-[#8e8e93]">now</span>
               </div>
-
               {/* Notification content */}
-              <div className="flex items-start gap-2 px-3 pb-3">
+              <div className="flex items-start gap-2.5 px-3.5 pb-3.5">
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold leading-snug text-[#1c1c1e] line-clamp-1">
                     {title || 'Notification title'}
                   </p>
-                  <p className="mt-0.5 text-[12px] leading-snug text-[#3c3c43] line-clamp-2">
+                  <p className="mt-0.5 text-[12px] leading-snug text-[#3c3c43cc] line-clamp-2">
                     {body || 'Notification body text'}
                   </p>
                 </div>
-                {/* Thumbnail (image > leftIcon) */}
                 {thumbUrl ? (
-                  <img
-                    src={thumbUrl}
-                    alt=""
-                    className="h-[44px] w-[44px] flex-shrink-0 rounded-xl object-cover"
-                  />
+                  <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover shadow-sm" />
                 ) : (
-                  <div className="flex h-[44px] w-[44px] flex-shrink-0 items-center justify-center rounded-xl bg-accent-500/15">
+                  <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-accent-500/15">
                     <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* More notifications placeholder */}
-            <div className="sim-ios-more mt-2 rounded-2xl px-3 py-2 text-center text-[9px] text-[#8e8e93]">
+            {/* Stacked second notification (iOS stack effect) */}
+            <div className="sim-ios-more mx-2 mt-[-4px] rounded-b-[18px] px-3 py-1.5 text-center text-[9px] text-[#8e8e93]">
               1 more notification
             </div>
           </div>
 
           {/* Home indicator */}
-          <div className="bg-[#f2f2f7] pb-2 pt-1 flex justify-center">
-            <div className="h-[4px] w-28 rounded-full bg-[#1c1c1e]/20" />
+          <div className="flex justify-center bg-gradient-to-b from-[#eef2f8] to-[#f2f2f7] pb-2.5 pt-1">
+            <div className="h-[4px] w-[100px] rounded-full bg-[#1c1c1e]/18" />
           </div>
         </div>
       </div>
-      <p className="mt-2 text-center text-[10px] text-tx-muted">iOS</p>
+      <p className="mt-2 text-center text-[10px] text-tx-muted">iPhone 17 Pro Max</p>
     </div>
   );
 }

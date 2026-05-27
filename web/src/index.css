@@ -35,15 +35,21 @@
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #dce5f0 0%, #eaf0f8 50%, #f4f8fc 100%);
+  padding-inline: 2rem; /* 32 px left / right gap from viewport edge */
+  overflow-x: hidden;
+  background: radial-gradient(circle at top, #b8cfe8 0%, #dce8f4 45%, #eef4fb 100%);
   transition: background 0.2s;
 }
 
 html.dark body {
-  background: radial-gradient(circle at top, #1f2633 0%, #0d1117 40%, #07090e 100%);
+  background: radial-gradient(circle at top, #111827 0%, #0a0f1a 40%, #050709 100%);
 }
 
 /* ── Glass card ───────────────────────────────────────────────────────────── */
