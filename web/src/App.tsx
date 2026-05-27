@@ -1443,11 +1443,7 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreview
                 </div>
                 {leftIconUrl ? (
                   <img src={leftIconUrl} alt="" className="h-[48px] w-[48px] flex-shrink-0 rounded-[14px] object-cover" />
-                ) : (
-                  <div className="flex h-[48px] w-[48px] flex-shrink-0 items-center justify-center rounded-[14px] bg-accent-500/20">
-                    <span className="text-[14px] font-bold text-accent-400">{iconLabel}</span>
-                  </div>
-                )}
+                ) : null}
               </div>
               {imageUrl ? (
                 <img src={imageUrl} alt="" className="sim-bigpic w-full object-cover" />
@@ -1551,11 +1547,7 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
                 </div>
                 {thumbUrl ? (
                   <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover" />
-                ) : (
-                  <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-accent-500/15">
-                    <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
 
