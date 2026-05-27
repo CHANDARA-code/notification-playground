@@ -44,12 +44,12 @@ body {
   min-height: 100vh;
   padding-inline: 2rem; /* 32 px left / right gap from viewport edge */
   overflow-x: hidden;
-  background: radial-gradient(circle at top, #b8cfe8 0%, #dce8f4 45%, #eef4fb 100%);
+  background: #e8f0f8;
   transition: background 0.2s;
 }
 
 html.dark body {
-  background: radial-gradient(circle at top, #111827 0%, #0a0f1a 40%, #050709 100%);
+  background: #0a0f1a;
 }
 
 /* ── Glass card ───────────────────────────────────────────────────────────── */

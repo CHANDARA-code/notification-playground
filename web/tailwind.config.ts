@@ -41,9 +41,6 @@ export default {
           strong: 'var(--c-border-strong)',
         },
       },
-      boxShadow: {
-        glow: '0 0 30px rgba(255, 106, 61, 0.25)',
-      },
     },
   },
   plugins: [],

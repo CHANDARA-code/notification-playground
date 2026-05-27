@@ -521,7 +521,7 @@ export default function App() {
       </header>
 
       <main className="mt-10 grid gap-8 lg:grid-cols-[54fr_46fr]">
-        <section className="glass rounded-3xl p-6 shadow-glow">
+        <section className="glass rounded-3xl p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-tx-base">Payload</h2>
             <span className="text-xs text-tx-muted">API: {apiBaseUrl}</span>
@@ -938,7 +938,7 @@ export default function App() {
               >
                 {hoveredCurl === 'api' && (
                   <div
-                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3 shadow-xl"
+                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3"
                     onMouseEnter={() => openCurlPreview('api')}
                     onMouseLeave={scheduleCurlDismiss}
                   >
@@ -980,7 +980,7 @@ export default function App() {
               >
                 {hoveredCurl === 'firebase' && (
                   <div
-                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3 shadow-xl"
+                    className="absolute bottom-full left-0 z-50 mb-1 w-[520px] max-w-[calc(100vw-2rem)] rounded-xl border border-bd bg-surface-3 p-3"
                     onMouseEnter={() => openCurlPreview('firebase')}
                     onMouseLeave={scheduleCurlDismiss}
                   >
@@ -1033,14 +1033,14 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setSimPlatform('android')}
-                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'android' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
+                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'android' ? 'bg-surface text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
               >
                 S26 Ultra
               </button>
               <button
                 type="button"
                 onClick={() => setSimPlatform('ios')}
-                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'ios' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
+                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'ios' ? 'bg-surface text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
               >
                 iPhone 17 Pro
               </button>
@@ -1253,7 +1253,7 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreview
   return (
     <div className="sim-phone-frame mx-auto">
       {/* Samsung Galaxy S26 Ultra — titanium flat frame, squared corners */}
-      <div className="relative rounded-[1.9rem] bg-[#1c1c1e] p-[6px] shadow-2xl ring-1 ring-white/10">
+      <div className="relative rounded-[1.9rem] bg-[#1c1c1e] p-[6px] ring-1 ring-white/10">
         {/* Titanium frame inner edge highlight */}
         <div className="pointer-events-none absolute inset-[3px] rounded-[1.5rem] ring-[0.5px] ring-white/8" />
 
@@ -1310,7 +1310,7 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreview
           {/* One UI 7 notification shade — dark blurred wallpaper */}
           <div className="min-h-[455px] bg-[#0d0d0d] px-2.5 py-2">
             {/* One UI notification card — pill/rounded rectangle, frosted dark */}
-            <div className="overflow-hidden rounded-[22px] bg-[#1c1c1e] shadow-lg ring-[0.5px] ring-white/8">
+            <div className="overflow-hidden rounded-[22px] bg-[#1c1c1e] ring-[0.5px] ring-white/8">
               {/* App row */}
               <div className="flex items-center gap-1.5 px-3.5 pt-3 pb-1">
                 <div className="flex h-[15px] w-[15px] items-center justify-center rounded-[4px] bg-accent-500">
@@ -1363,7 +1363,7 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
   return (
     <div className="sim-phone-frame mx-auto">
       {/* iPhone 17 Pro Max — titanium flat-edge frame, large rounded corners */}
-      <div className="relative rounded-[3.2rem] bg-[#2c2c2e] p-[7px] shadow-2xl ring-1 ring-white/15">
+      <div className="relative rounded-[3.2rem] bg-[#2c2c2e] p-[7px] ring-1 ring-white/15">
         {/* Titanium brushed highlight — top edge */}
         <div className="pointer-events-none absolute inset-[4px] rounded-[2.8rem] ring-[0.5px] ring-white/10" />
 
@@ -1392,7 +1392,7 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
           <div className="relative flex items-center justify-between px-5 pb-1 pt-3.5">
             <span className="text-[12px] font-semibold text-[#1c1c1e]">9:41</span>
             {/* Dynamic Island — pill */}
-            <div className="absolute left-1/2 top-2 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-black shadow-lg" />
+            <div className="absolute left-1/2 top-2 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-black" />
             <div className="flex items-center gap-[4px]">
               <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
                 <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="#1c1c1e" fillOpacity="0.35"/>
@@ -1415,12 +1415,12 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
           </div>
 
           {/* Lock screen — subtle blurred wallpaper tint */}
-          <div className="min-h-[453px] bg-gradient-to-b from-[#dde4ef] to-[#eef2f8] px-3 py-3">
+          <div className="min-h-[453px] bg-[#e8ecf2] px-3 py-3">
             {/* iOS 18 notification banner — full-width frosted glass card */}
-            <div className="sim-ios-notif overflow-hidden rounded-[22px] shadow-xl">
+            <div className="sim-ios-notif overflow-hidden rounded-[22px]">
               {/* App header */}
               <div className="flex items-center gap-2 px-3.5 pt-3 pb-1">
-                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded-[7px] bg-accent-500 shadow-sm">
+                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded-[7px] bg-accent-500">
                   <span className="text-[7px] font-bold text-white leading-none">{iconLabel}</span>
                 </div>
                 <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider text-[#8e8e93]">
@@ -1439,7 +1439,7 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
                   </p>
                 </div>
                 {thumbUrl ? (
-                  <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover shadow-sm" />
+                  <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover" />
                 ) : (
                   <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-accent-500/15">
                     <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
@@ -1455,7 +1455,7 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProp
           </div>
 
           {/* Home indicator */}
-          <div className="flex justify-center bg-gradient-to-b from-[#eef2f8] to-[#f2f2f7] pb-2.5 pt-1">
+          <div className="flex justify-center bg-[#f2f2f7] pb-2.5 pt-1">
             <div className="h-[4px] w-[100px] rounded-full bg-[#1c1c1e]/18" />
           </div>
         </div>
