@@ -128,3 +128,87 @@ export async function activateConfig(id: number) {
   }
   return response.json() as Promise<AppConfig>;
 }
+
+export interface Topic {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+}
+
+export async function listTopics(): Promise<Topic[]> {
+  const response = await fetch(`${apiBaseUrl}/topics`);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to load topics');
+  }
+  return response.json() as Promise<Topic[]>;
+}
+
+export async function createTopic(payload: {
+  name: string;
+  description?: string | null;
+}): Promise<Topic> {
+  const response = await fetch(`${apiBaseUrl}/topics`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to create topic');
+  }
+  return response.json() as Promise<Topic>;
+}
+
+export async function deleteTopic(id: number): Promise<{ deleted: boolean }> {
+  const response = await fetch(`${apiBaseUrl}/topics/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to delete topic');
+  }
+  return response.json() as Promise<{ deleted: boolean }>;
+}
+
+export interface TopicSubscriptionResult {
+  successCount: number;
+  failureCount: number;
+  errors: Array<{ index: number; reason: string }>;
+}
+
+export async function subscribeTokensToTopic(
+  topicName: string,
+  tokens: string[],
+): Promise<TopicSubscriptionResult> {
+  const response = await fetch(`${apiBaseUrl}/topics/${encodeURIComponent(topicName)}/subscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tokens }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to subscribe tokens to topic');
+  }
+  return response.json() as Promise<TopicSubscriptionResult>;
+}
+
+export async function unsubscribeTokensFromTopic(
+  topicName: string,
+  tokens: string[],
+): Promise<TopicSubscriptionResult> {
+  const response = await fetch(
+    `${apiBaseUrl}/topics/${encodeURIComponent(topicName)}/unsubscribe`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens }),
+    },
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to unsubscribe tokens from topic');
+  }
+  return response.json() as Promise<TopicSubscriptionResult>;
+}

@@ -18,7 +18,8 @@
       "@notifications/*": ["src/notifications/*"],
       "@firebase/*": ["src/firebase/*"],
       "@config/*": ["src/config/*"],
-      "@model/*": ["src/db/schema/*"]
+      "@model/*": ["src/db/schema/*"],
+      "@topics/*": ["src/topics/*"]
     }
   },
   "include": ["src"]

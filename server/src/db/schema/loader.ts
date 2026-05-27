@@ -1,4 +1,4 @@
-export type SchemaModule = { schema: any; devices: any };
+export type SchemaModule = { schema: any; devices: any; notifications: any; pushConfigs: any; topics: any; deviceTopics: any };
 
 export function loadSchema(client: string): SchemaModule {
   const normalized = client.toLowerCase();

@@ -24,3 +24,11 @@ export function getNotificationsTable() {
 export function getPushConfigsTable() {
   return getSchema().pushConfigs;
 }
+
+export function getTopicsTable() {
+  return getSchema().topics;
+}
+
+export function getDeviceTopicsTable() {
+  return getSchema().deviceTopics;
+}

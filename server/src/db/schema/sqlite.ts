@@ -5,6 +5,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core';
 
+
 export const devices = sqliteTable(
   'devices',
   {
@@ -63,4 +64,37 @@ export const pushConfigs = sqliteTable('push_configs', {
     .defaultNow(),
 });
 
-export const schema = { devices, notifications, pushConfigs };
+export const topics = sqliteTable(
+  'topics',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    name: text('name').notNull(),
+    description: text('description'),
+    createdAt: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    nameIdx: uniqueIndex('topics_name_idx').on(table.name),
+  }),
+);
+
+export const deviceTopics = sqliteTable(
+  'device_topics',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    deviceId: integer('device_id').notNull(),
+    topicId: integer('topic_id').notNull(),
+    subscribedAt: integer('subscribed_at', { mode: 'timestamp' })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    deviceTopicIdx: uniqueIndex('device_topics_device_topic_idx').on(
+      table.deviceId,
+      table.topicId,
+    ),
+  }),
+);
+
+export const schema = { devices, notifications, pushConfigs, topics, deviceTopics };

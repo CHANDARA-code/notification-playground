@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -9,6 +10,7 @@ export default {
         display: ['"Clash Display"', '"Space Grotesk"', 'ui-sans-serif'],
       },
       colors: {
+        // original design tokens (kept for compatibility)
         ink: {
           900: '#0d1117',
           800: '#161b22',
@@ -22,6 +24,21 @@ export default {
           400: '#ff6a3d',
           500: '#ff3d55',
           600: '#cc2c45',
+        },
+        // semantic tokens — values switch via CSS vars in :root / .dark
+        surface: {
+          DEFAULT: 'var(--c-surface)',
+          2: 'var(--c-surface-2)',
+          3: 'var(--c-surface-3)',
+          hover: 'var(--c-surface-hover)',
+        },
+        tx: {
+          base: 'var(--c-text)',
+          muted: 'var(--c-text-muted)',
+        },
+        bd: {
+          DEFAULT: 'var(--c-border)',
+          strong: 'var(--c-border-strong)',
         },
       },
       boxShadow: {

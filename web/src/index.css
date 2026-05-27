@@ -4,18 +4,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light mode (default) ─────────────────────────────────────────────────── */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --c-surface:       #ffffff;
+  --c-surface-2:     #f0f4f8;
+  --c-surface-3:     #e4ebf2;
+  --c-surface-hover: #d8e2ec;
+  --c-text:          #0f172a;
+  --c-text-muted:    #64748b;
+  --c-border:        rgba(15, 23, 42, 0.12);
+  --c-border-strong: rgba(15, 23, 42, 0.24);
+  --c-glass-bg:      rgba(255, 255, 255, 0.80);
+  --c-glass-border:  rgba(15, 23, 42, 0.10);
 }
 
+/* ── Dark mode ────────────────────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --c-surface:       #161b22;
+  --c-surface-2:     #1f2633;
+  --c-surface-3:     #0d1117;
+  --c-surface-hover: #2a3345;
+  --c-text:          #f4f6fb;
+  --c-text-muted:    #d8dfea;
+  --c-border:        rgba(255, 255, 255, 0.10);
+  --c-border-strong: rgba(255, 255, 255, 0.30);
+  --c-glass-bg:      rgba(22, 27, 34, 0.70);
+  --c-glass-border:  rgba(255, 255, 255, 0.08);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 body {
   font-family: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui;
   min-height: 100vh;
+  background: radial-gradient(circle at top, #dce5f0 0%, #eaf0f8 50%, #f4f8fc 100%);
+  transition: background 0.2s;
+}
+
+html.dark body {
   background: radial-gradient(circle at top, #1f2633 0%, #0d1117 40%, #07090e 100%);
 }
 
+/* ── Glass card ───────────────────────────────────────────────────────────── */
 .glass {
-  background: rgba(22, 27, 34, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--c-glass-bg);
+  border: 1px solid var(--c-glass-border);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }

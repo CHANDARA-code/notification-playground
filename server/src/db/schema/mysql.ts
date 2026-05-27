@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   datetime,
   int,
@@ -74,4 +75,37 @@ export const pushConfigs = mysqlTable('push_configs', {
     .defaultNow(),
 });
 
-export const schema = { devices, notifications, pushConfigs };
+export const topics = mysqlTable(
+  'topics',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    name: varchar('name', { length: 120 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    createdAt: datetime('created_at', { mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    nameIdx: uniqueIndex('topics_name_idx').on(table.name),
+  }),
+);
+
+export const deviceTopics = mysqlTable(
+  'device_topics',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    deviceId: int('device_id').notNull(),
+    topicId: int('topic_id').notNull(),
+    subscribedAt: datetime('subscribed_at', { mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    deviceTopicIdx: uniqueIndex('device_topics_device_topic_idx').on(
+      table.deviceId,
+      table.topicId,
+    ),
+  }),
+);
+
+export const schema = { devices, notifications, pushConfigs, topics, deviceTopics };

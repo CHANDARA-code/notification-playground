@@ -74,4 +74,37 @@ export const pushConfigs = pgTable('push_configs', {
     .defaultNow(),
 });
 
-export const schema = { devices, notifications, pushConfigs };
+export const topics = pgTable(
+  'topics',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar('name', { length: 120 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    createdAt: timestamp('created_at', { withTimezone: false })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    nameIdx: uniqueIndex('topics_name_idx').on(table.name),
+  }),
+);
+
+export const deviceTopics = pgTable(
+  'device_topics',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    deviceId: integer('device_id').notNull(),
+    topicId: integer('topic_id').notNull(),
+    subscribedAt: timestamp('subscribed_at', { withTimezone: false })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    deviceTopicIdx: uniqueIndex('device_topics_device_topic_idx').on(
+      table.deviceId,
+      table.topicId,
+    ),
+  }),
+);
+
+export const schema = { devices, notifications, pushConfigs, topics, deviceTopics };

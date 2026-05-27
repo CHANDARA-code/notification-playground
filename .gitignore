@@ -37,3 +37,7 @@
 
 # Logs
 *.log
+
+# Firebase / GCP service accounts
+**/service-account.json
+**/service-account.json.json
