@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'history_store.dart';
 import 'notification_service.dart';
+import 'topic_management_screen.dart';
 
 class PlaygroundScreen extends StatefulWidget {
   const PlaygroundScreen({super.key, required this.apiBaseUrl});
@@ -202,6 +203,33 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Push Playground'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.topic_outlined),
+            tooltip: 'Manage Topics',
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final navigator = Navigator.of(context);
+              final token = _tokenController.text.trim().isNotEmpty
+                  ? _tokenController.text.trim()
+                  : await NotificationService.instance.fetchToken();
+              if (token == null || token.isEmpty) {
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('No device token available')),
+                );
+                return;
+              }
+              navigator.push(
+                MaterialPageRoute(
+                  builder: (_) => TopicManagementScreen(
+                    apiBaseUrl: widget.apiBaseUrl,
+                    deviceToken: token,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

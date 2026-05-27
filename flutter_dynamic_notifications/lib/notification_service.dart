@@ -178,6 +178,84 @@ class NotificationService {
     return jsonDecode(responseBody) as Map<String, dynamic>;
   }
 
+  // ── Topic management ──────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> createTopicOnServer(
+    String apiBaseUrl, {
+    required String name,
+    String? description,
+  }) async {
+    final uri = Uri.parse('$apiBaseUrl/topics');
+    final payload = jsonEncode({
+      'name': name.trim(),
+      if (description != null && description.trim().isNotEmpty)
+        'description': description.trim(),
+    });
+    final responseBody = await _postJson(uri, payload);
+    if (responseBody == null || responseBody.isEmpty) {
+      throw Exception('Empty response from server');
+    }
+    return jsonDecode(responseBody) as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchAvailableTopics(String apiBaseUrl) async {
+    final uri = Uri.parse('$apiBaseUrl/topics');
+    final responseBody = await _getJson(uri);
+    if (responseBody == null || responseBody.isEmpty) return [];
+    final decoded = jsonDecode(responseBody);
+    if (decoded is! List) return [];
+    return decoded.cast<Map<String, dynamic>>();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchDeviceTopics(
+    String apiBaseUrl,
+    String token,
+  ) async {
+    final encoded = Uri.encodeComponent(token);
+    final uri = Uri.parse('$apiBaseUrl/devices/$encoded/topics');
+    final responseBody = await _getJson(uri);
+    if (responseBody == null || responseBody.isEmpty) return [];
+    final decoded = jsonDecode(responseBody);
+    if (decoded is! List) return [];
+    return decoded.cast<Map<String, dynamic>>();
+  }
+
+  Future<List<Map<String, dynamic>>> syncDeviceTopics(
+    String apiBaseUrl, {
+    required String token,
+    required List<String> topicNames,
+  }) async {
+    final encoded = Uri.encodeComponent(token);
+    final uri = Uri.parse('$apiBaseUrl/devices/$encoded/topics/sync');
+    final payload = jsonEncode({'topics': topicNames});
+    final responseBody = await _postJson(uri, payload);
+    if (responseBody == null || responseBody.isEmpty) return [];
+    final decoded = jsonDecode(responseBody);
+    if (decoded is! List) return [];
+
+    // keep Firebase subscriptions in sync
+    final subscribedNames = decoded
+        .cast<Map<String, dynamic>>()
+        .map((t) => t['name']?.toString() ?? '')
+        .where((n) => n.isNotEmpty)
+        .toSet();
+
+    final prefs = await SharedPreferences.getInstance();
+    final previousTopics = (prefs.getStringList('push_topics') ?? []).toSet();
+
+    for (final topic in previousTopics.difference(subscribedNames)) {
+      await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+    }
+    for (final topic in subscribedNames.difference(previousTopics)) {
+      await FirebaseMessaging.instance.subscribeToTopic(topic);
+    }
+
+    await prefs.setStringList('push_topics', subscribedNames.toList());
+    return decoded.cast<Map<String, dynamic>>();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   Future<Map<String, dynamic>?> fetchRemoteConfig(String apiBaseUrl) async {
     final uri = Uri.parse('$apiBaseUrl/config');
     final responseBody = await _getJson(uri);
