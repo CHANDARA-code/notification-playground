@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -40,7 +40,7 @@ html {
 }
 
 body {
-  font-family: 'Space Grotesk', 'IBM Plex Sans', ui-sans-serif, system-ui;
+  font-family: 'Google Sans', 'Google Sans Display', ui-sans-serif, system-ui;
   min-height: 100vh;
   padding-inline: 2rem; /* 32 px left / right gap from viewport edge */
   overflow-x: hidden;

@@ -101,6 +101,7 @@ export default function App() {
   const [apiUrlDraft, setApiUrlDraft] = useState('');
   const [configOpen, setConfigOpen] = useState(true);
   const [targetOpen, setTargetOpen] = useState(true);
+  const [appearanceOpen, setAppearanceOpen] = useState(true);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -942,79 +943,99 @@ export default function App() {
               </>)}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Title" required>
-                <InputWrap icon="text">
-                  <input
-                    title="Notification title"
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                  />
-                </InputWrap>
-              </Field>
-              <Field label="Body" required>
-                <InputWrap icon="chat">
-                  <input
-                    title="Notification body"
-                    value={body}
-                    onChange={(event) => setBody(event.target.value)}
-                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                  />
-                </InputWrap>
-              </Field>
-            </div>
+            <div className="rounded-2xl border border-bd bg-surface p-4">
+              <button
+                type="button"
+                onClick={() => setAppearanceOpen((o) => !o)}
+                className="flex w-full items-center justify-between"
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
+                  Appearance Notification
+                </p>
+                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${appearanceOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Small icon" hint="Must be a bundled drawable">
-                <InputWrap icon="swatch">
-                  <select
-                    title="Small icon"
-                    value={icon}
-                    onChange={(event) => setIcon(event.target.value)}
-                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                  >
-                    {iconOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </InputWrap>
-              </Field>
-              <Field label="Left icon URL" hint="Large icon image (URL)">
-                <InputWrap icon="photo">
-                  <input
-                    title="Left icon URL"
-                    value={leftIconUrl}
-                    onChange={(event) => setLeftIconUrl(event.target.value)}
-                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                  />
-                </InputWrap>
-              </Field>
-            </div>
-            <Field label="Image URL" hint="Optional big picture">
-              <InputWrap icon="photo">
-                <input
-                  title="Image URL"
-                  value={imageUrl}
-                  onChange={(event) => setImageUrl(event.target.value)}
-                  className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
-              </InputWrap>
-            </Field>
+              {appearanceOpen && (<>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <Field label="Title" required>
+                    <InputWrap icon="text">
+                      <input
+                        title="Notification title"
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                  <Field label="Body" required>
+                    <InputWrap icon="chat">
+                      <input
+                        title="Notification body"
+                        value={body}
+                        onChange={(event) => setBody(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
 
-            <Field label="Custom data (JSON)">
-              <InputWrap icon="code">
-                <textarea
-                  title="Custom data JSON"
-                  value={dataJson}
-                  onChange={(event) => setDataJson(event.target.value)}
-                  rows={5}
-                  className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
-              </InputWrap>
-            </Field>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <Field label="Small icon" hint="Must be a bundled drawable">
+                    <InputWrap icon="swatch">
+                      <select
+                        title="Small icon"
+                        value={icon}
+                        onChange={(event) => setIcon(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      >
+                        {iconOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </InputWrap>
+                  </Field>
+                  <Field label="Left icon URL" hint="Large icon image (URL)">
+                    <InputWrap icon="photo">
+                      <input
+                        title="Left icon URL"
+                        value={leftIconUrl}
+                        onChange={(event) => setLeftIconUrl(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
+
+                <div className="mt-4">
+                  <Field label="Image URL" hint="Optional big picture">
+                    <InputWrap icon="photo">
+                      <input
+                        title="Image URL"
+                        value={imageUrl}
+                        onChange={(event) => setImageUrl(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
+
+                <div className="mt-4">
+                  <Field label="Meta data" hint="Custom JSON payload">
+                    <InputWrap icon="code">
+                      <textarea
+                        title="Custom data JSON"
+                        value={dataJson}
+                        onChange={(event) => setDataJson(event.target.value)}
+                        rows={5}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
+              </>)}
+            </div>
 
             {error ? (
               <div className="rounded-xl border border-accent-600/60 bg-accent-600/10 px-4 py-3 text-sm text-accent-400">
