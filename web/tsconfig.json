@@ -19,7 +19,8 @@
       "@model/*": ["src/model/*"],
       "@features/*": ["src/features/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@ui/*": ["src/ui/*"]
+      "@ui/*": ["src/ui/*"],
+      "@assets/*": ["src/assets/*"]
     }
   },
   "include": ["src", "tests", "vite.config.ts", "vitest.config.ts"]

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Ic, InputWrap } from '@assets/icons';
 
 import {
   activateConfig,
@@ -506,15 +507,7 @@ export default function App() {
             title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-bd bg-surface transition hover:bg-surface-2"
           >
-            {isDark ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-tx-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
-              </svg>
-            )}
+            <Ic name={isDark ? 'sun' : 'moon'} className="text-base text-tx-muted shrink-0" />
           </button>
         </div>
         <h1 className="mt-4 text-3xl font-semibold text-tx-base md:text-5xl">
@@ -542,14 +535,16 @@ export default function App() {
                   setApiUrlEditing(false);
                 }}
               >
-                <input
-                  title="API base URL"
-                  autoFocus
-                  value={apiUrlDraft}
-                  onChange={(e) => setApiUrlDraft(e.target.value)}
-                  placeholder="http://localhost:3000"
-                  className="min-w-0 flex-1 rounded-lg border border-bd bg-surface-2 px-3 py-1 text-xs text-tx-base outline-none focus:border-accent-400"
-                />
+                <InputWrap icon="globe" compact>
+                  <input
+                    title="API base URL"
+                    autoFocus
+                    value={apiUrlDraft}
+                    onChange={(e) => setApiUrlDraft(e.target.value)}
+                    placeholder="http://localhost:3000"
+                    className="min-w-0 w-full rounded-lg border border-bd bg-surface-2 pl-8 pr-3 py-1 text-xs text-tx-base outline-none focus:border-accent-400"
+                  />
+                </InputWrap>
                 <button type="submit" className="inline-flex items-center gap-1 rounded-lg border border-bd px-2.5 py-1 text-xs text-tx-base transition hover:border-bd-strong">
                   Save <Ic name="check" />
                 </button>
@@ -581,9 +576,7 @@ export default function App() {
                 onClick={() => { setApiUrlDraft(apiUrl); setApiUrlEditing(true); }}
                 className="flex items-center gap-1.5 rounded-lg border border-bd px-2.5 py-1 text-xs text-tx-muted transition hover:border-bd-strong hover:text-tx-base"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
+                <Ic name="link" />
                 {apiUrl}
               </button>
             )}
@@ -599,62 +592,64 @@ export default function App() {
                 <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
                   Config manager
                 </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-3.5 w-3.5 text-tx-muted transition-transform duration-200 ${configOpen ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${configOpen ? 'rotate-180' : ''}`} />
               </button>
               {configOpen && (<>
               <div className="mt-4 grid gap-4">
                 <Field label="Name" hint="Config label">
-                  <input
-                    title="Config name"
-                    value={configName}
-                    onChange={(event) => setConfigName(event.target.value)}
-                    className="w-full rounded-xl border border-bd bg-surface-2 px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                  />
+                  <InputWrap icon="tag">
+                    <input
+                      title="Config name"
+                      value={configName}
+                      onChange={(event) => setConfigName(event.target.value)}
+                      className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                    />
+                  </InputWrap>
                 </Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Topics" hint="Comma separated (e.g. ahaha, test, ios, android, all)">
-                    <input
-                      title="Topics"
-                      value={configTopics}
-                      onChange={(event) => setConfigTopics(event.target.value)}
-                      className="w-full rounded-xl border border-bd bg-surface-2 px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                    />
+                    <InputWrap icon="hash">
+                      <input
+                        title="Topics"
+                        value={configTopics}
+                        onChange={(event) => setConfigTopics(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
                   </Field>
                   <Field label="Android priority" hint="FCM Android priority">
-                    <select
-                      title="Android priority"
-                      value={configAndroidPriority}
-                      onChange={(event) =>
-                        setConfigAndroidPriority(
-                          event.target.value as ConfigPriority,
-                        )
-                      }
-                      className="w-full rounded-xl border border-bd bg-surface-2 px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                    >
-                      <option value="high">high</option>
-                      <option value="normal">normal</option>
-                    </select>
+                    <InputWrap icon="phone">
+                      <select
+                        title="Android priority"
+                        value={configAndroidPriority}
+                        onChange={(event) =>
+                          setConfigAndroidPriority(
+                            event.target.value as ConfigPriority,
+                          )
+                        }
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      >
+                        <option value="high">high</option>
+                        <option value="normal">normal</option>
+                      </select>
+                    </InputWrap>
                   </Field>
                   <Field label="iOS priority" hint="APNs priority">
-                    <select
-                      title="iOS priority"
-                      value={configApnsPriority}
-                      onChange={(event) =>
-                        setConfigApnsPriority(
-                          event.target.value as ConfigPriority,
-                        )
-                      }
-                      className="w-full rounded-xl border border-bd bg-surface-2 px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                    >
-                      <option value="high">high</option>
-                      <option value="normal">normal</option>
-                    </select>
+                    <InputWrap icon="phone">
+                      <select
+                        title="iOS priority"
+                        value={configApnsPriority}
+                        onChange={(event) =>
+                          setConfigApnsPriority(
+                            event.target.value as ConfigPriority,
+                          )
+                        }
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      >
+                        <option value="high">high</option>
+                        <option value="normal">normal</option>
+                      </select>
+                    </InputWrap>
                   </Field>
                 </div>
               </div>
@@ -760,13 +755,7 @@ export default function App() {
                 <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
                   Target Push Notification
                 </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-3.5 w-3.5 text-tx-muted transition-transform duration-200 ${targetOpen ? 'rotate-180' : ''}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${targetOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {targetOpen && (<>
@@ -784,20 +773,24 @@ export default function App() {
                   </div>
 
                   <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                    <input
-                      value={topicName}
-                      onChange={(e) => setTopicName(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
-                      placeholder="Topic name *"
-                      className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
-                    />
-                    <input
-                      value={topicDesc}
-                      onChange={(e) => setTopicDesc(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
-                      placeholder="Description (optional)"
-                      className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
-                    />
+                    <InputWrap icon="hash">
+                      <input
+                        value={topicName}
+                        onChange={(e) => setTopicName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
+                        placeholder="Topic name *"
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                    <InputWrap icon="info">
+                      <input
+                        value={topicDesc}
+                        onChange={(e) => setTopicDesc(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
+                        placeholder="Description (optional)"
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
                     <button
                       type="button"
                       onClick={() => void handleCreateTopic()}
@@ -859,17 +852,19 @@ export default function App() {
                               <p className="mb-2 text-xs uppercase tracking-[0.2em] text-tx-muted">
                                 Subscribe / unsubscribe FCM tokens
                               </p>
-                              <textarea
-                                title="FCM tokens (one per line)"
-                                placeholder="Paste FCM tokens — one per line"
-                                value={subscribeTokens}
-                                onChange={(e) => {
-                                  setSubscribeTokens(e.target.value);
-                                  setSubscribeResult(null);
-                                }}
-                                rows={4}
-                                className="w-full rounded-xl border border-bd bg-surface px-3 py-2 text-xs text-tx-base outline-none focus:border-accent-400"
-                              />
+                              <InputWrap icon="users">
+                                <textarea
+                                  title="FCM tokens (one per line)"
+                                  placeholder="Paste FCM tokens — one per line"
+                                  value={subscribeTokens}
+                                  onChange={(e) => {
+                                    setSubscribeTokens(e.target.value);
+                                    setSubscribeResult(null);
+                                  }}
+                                  rows={4}
+                                  className="w-full rounded-xl border border-bd bg-surface pl-10 pr-3 py-2 text-xs text-tx-base outline-none focus:border-accent-400"
+                                />
+                              </InputWrap>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 <button
                                   type="button"
@@ -933,13 +928,15 @@ export default function App() {
                 {/* ── FCM Token ── */}
                 <div className="mt-4 border-t border-bd pt-4">
                   <Field label="FCM token">
-                    <textarea
-                      value={token}
-                      onChange={(event) => setToken(event.target.value)}
-                      rows={2}
-                      placeholder="Optional if topics are selected or an active config is set"
-                      className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                    />
+                    <InputWrap icon="key">
+                      <textarea
+                        value={token}
+                        onChange={(event) => setToken(event.target.value)}
+                        rows={2}
+                        placeholder="Optional if topics are selected or an active config is set"
+                        className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
                   </Field>
                 </div>
               </>)}
@@ -947,64 +944,76 @@ export default function App() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Title" required>
-                <input
-                  title="Notification title"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
+                <InputWrap icon="text">
+                  <input
+                    title="Notification title"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                  />
+                </InputWrap>
               </Field>
               <Field label="Body" required>
-                <input
-                  title="Notification body"
-                  value={body}
-                  onChange={(event) => setBody(event.target.value)}
-                  className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
+                <InputWrap icon="chat">
+                  <input
+                    title="Notification body"
+                    value={body}
+                    onChange={(event) => setBody(event.target.value)}
+                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                  />
+                </InputWrap>
               </Field>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Small icon" hint="Must be a bundled drawable">
-                <select
-                  title="Small icon"
-                  value={icon}
-                  onChange={(event) => setIcon(event.target.value)}
-                  className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                >
-                  {iconOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                <InputWrap icon="swatch">
+                  <select
+                    title="Small icon"
+                    value={icon}
+                    onChange={(event) => setIcon(event.target.value)}
+                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                  >
+                    {iconOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </InputWrap>
               </Field>
               <Field label="Left icon URL" hint="Large icon image (URL)">
-                <input
-                  title="Left icon URL"
-                  value={leftIconUrl}
-                  onChange={(event) => setLeftIconUrl(event.target.value)}
-                  className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
+                <InputWrap icon="photo">
+                  <input
+                    title="Left icon URL"
+                    value={leftIconUrl}
+                    onChange={(event) => setLeftIconUrl(event.target.value)}
+                    className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                  />
+                </InputWrap>
               </Field>
             </div>
             <Field label="Image URL" hint="Optional big picture">
-              <input
-                title="Image URL"
-                value={imageUrl}
-                onChange={(event) => setImageUrl(event.target.value)}
-                className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-              />
+              <InputWrap icon="photo">
+                <input
+                  title="Image URL"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                />
+              </InputWrap>
             </Field>
 
             <Field label="Custom data (JSON)">
-              <textarea
-                title="Custom data JSON"
-                value={dataJson}
-                onChange={(event) => setDataJson(event.target.value)}
-                rows={5}
-                className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-              />
+              <InputWrap icon="code">
+                <textarea
+                  title="Custom data JSON"
+                  value={dataJson}
+                  onChange={(event) => setDataJson(event.target.value)}
+                  rows={5}
+                  className="w-full rounded-xl border border-bd bg-surface pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                />
+              </InputWrap>
             </Field>
 
             {error ? (
@@ -1039,9 +1048,7 @@ export default function App() {
                         onClick={() => setHoveredCurl(null)}
                         className="flex h-5 w-5 items-center justify-center rounded-lg text-tx-muted transition hover:bg-surface-hover hover:text-tx-base"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <Ic name="x" />
                       </button>
                     </div>
                     <pre className="max-h-[200px] overflow-auto whitespace-pre font-mono text-[10px] leading-relaxed text-tx-base">
@@ -1055,9 +1062,7 @@ export default function App() {
                   className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
                 >
                   {copiedCurl === 'api' ? 'Copied!' : 'Copy cURL — Our API'}
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                  <Ic name="copy" className="text-sm shrink-0" />
                 </button>
               </div>
 
@@ -1081,9 +1086,7 @@ export default function App() {
                         onClick={() => setHoveredCurl(null)}
                         className="flex h-5 w-5 items-center justify-center rounded-lg text-tx-muted transition hover:bg-surface-hover hover:text-tx-base"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <Ic name="x" />
                       </button>
                     </div>
                     <pre className="max-h-[200px] overflow-auto whitespace-pre font-mono text-[10px] leading-relaxed text-tx-base">
@@ -1097,9 +1100,7 @@ export default function App() {
                   className="inline-flex items-center gap-2 rounded-xl border border-bd bg-surface px-4 py-2.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
                 >
                   {copiedCurl === 'firebase' ? 'Copied!' : 'Copy cURL — Firebase Admin'}
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                  <Ic name="copy" className="text-sm shrink-0" />
                 </button>
               </div>
 
@@ -1144,7 +1145,6 @@ export default function App() {
                 icon={icon}
                 leftIconUrl={leftIconUrl}
                 imageUrl={imageUrl}
-                isDark={isDark}
               />
             ) : (
               <IOSPhone
@@ -1153,7 +1153,6 @@ export default function App() {
                 icon={icon}
                 leftIconUrl={leftIconUrl}
                 imageUrl={imageUrl}
-                isDark={isDark}
               />
             )}
           </div>
@@ -1229,31 +1228,6 @@ export default function App() {
         </div>
       </section>
     </div>
-  );
-}
-
-function Ic({ name }: { name: string }) {
-  const paths: Record<string, string> = {
-    check: 'M4.5 12.75l6 6 9-13.5',
-    x: 'M6 18L18 6M6 6l12 12',
-    pencil: 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z',
-    bolt: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
-    trash: 'M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0',
-    refresh: 'M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99',
-    plus: 'M12 4.5v15m7.5-7.5h-15',
-    sliders: 'M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75',
-    link: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
-    unlink: 'M13.181 8.68a4.503 4.503 0 011.903 6.405m-9.768-3.22a4.503 4.503 0 006.087 1.416M6.831 8.302a4.5 4.5 0 00-1.457 7.152l4.5 4.5a4.5 4.5 0 006.364-6.364l-1.758-1.757M8.25 15.75l6-6',
-    send: 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
-    copy: 'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z',
-    undo: 'M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3',
-    'arrow-left': 'M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18',
-    'arrow-right': 'M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3',
-  };
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d={paths[name] ?? ''} />
-    </svg>
   );
 }
 
@@ -1361,27 +1335,10 @@ interface PhonePreviewProps {
   icon: string;
   leftIconUrl: string;
   imageUrl: string;
-  isDark: boolean;
 }
 
-function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: PhonePreviewProps) {
+function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProps) {
   const iconLabel = icon.replace('ic_notif_', '').slice(0, 3).toUpperCase();
-
-  // Screen palette switches with mode
-  const statusBg   = isDark ? '#000000' : '#f5f5f5';
-  const timeColor  = isDark ? 'rgba(255,255,255,0.9)' : '#1c1c1e';
-  const iconFill   = isDark ? 'white' : '#1c1c1e';
-  const shadeBg    = isDark ? '#0d0d0d' : '#ebebeb';
-  const cardBg     = isDark ? '#1c1c1e' : '#ffffff';
-  const cardRing   = isDark ? 'ring-white/8' : 'ring-black/8';
-  const appName    = isDark ? '#adadad' : '#636366';
-  const timestamp  = isDark ? '#5a5a5a' : '#8e8e93';
-  const closeBtn   = isDark ? '#4a4a4a' : '#aeaeb2';
-  const titleColor = isDark ? '#ffffff' : '#1c1c1e';
-  const bodyColor  = isDark ? '#8e8e8e' : '#636366';
-  const swipeHint  = isDark ? '#3a3a3a' : '#b0b0b0';
-  const gestureBar = isDark ? 'bg-white/20' : 'bg-black/15';
-  const gestureBg  = isDark ? '#000000' : '#f5f5f5';
 
   return (
     <div className="sim-phone-frame mx-auto">
@@ -1413,53 +1370,53 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: Phon
         </div>
 
         {/* Screen */}
-        <div className="overflow-hidden rounded-[1.5rem]" style={{ background: statusBg }}>
+        <div className="overflow-hidden rounded-[1.5rem] dark:bg-black bg-[#f5f5f5]">
           {/* Status bar — centered punch-hole selfie camera */}
-          <div className="relative flex items-center justify-between px-4 pt-3 pb-1.5" style={{ background: statusBg }}>
-            <span className="text-[10px] font-medium" style={{ color: timeColor }}>12:00</span>
+          <div className="relative flex items-center justify-between px-4 pt-3 pb-1.5 dark:bg-black bg-[#f5f5f5]">
+            <span className="text-[10px] font-medium dark:text-white/90 text-[#1c1c1e]">12:00</span>
             {/* Punch-hole — small centered dot */}
             <div className="absolute left-1/2 top-[6px] h-[10px] w-[10px] -translate-x-1/2 rounded-full bg-[#0a0a0a] ring-[1.5px] ring-[#1a1a1a]" />
-            <div className="flex items-center gap-[5px]">
+            <div className="flex items-center gap-[5px] dark:text-white text-[#1c1c1e]">
               <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill={iconFill} fillOpacity="0.45"/>
-                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill={iconFill} fillOpacity="0.65"/>
-                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill={iconFill} fillOpacity="0.85"/>
-                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill={iconFill}/>
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="currentColor" fillOpacity="0.45"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="currentColor" fillOpacity="0.65"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="currentColor" fillOpacity="0.85"/>
+                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="currentColor"/>
               </svg>
               <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
-                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill={iconFill}/>
-                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke={iconFill} strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke={iconFill} strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.55"/>
+                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="currentColor"/>
+                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.55"/>
               </svg>
               <div className="flex items-center gap-[2px]">
-                <div className="h-[9px] w-[16px] rounded-[2px] p-[1.5px]" style={{ border: `1px solid ${iconFill}88` }}>
-                  <div className="h-full w-[70%] rounded-[1px]" style={{ background: iconFill }} />
+                <div className="h-[9px] w-[16px] rounded-[2px] p-[1.5px] border dark:border-white/55 border-[#1c1c1e]/55">
+                  <div className="h-full w-[70%] rounded-[1px] dark:bg-white bg-[#1c1c1e]" />
                 </div>
-                <div className="h-[5px] w-[2px] rounded-r-sm" style={{ background: `${iconFill}88` }} />
+                <div className="h-[5px] w-[2px] rounded-r-sm dark:bg-white/55 bg-[#1c1c1e]/55" />
               </div>
             </div>
           </div>
 
           {/* One UI 7 notification shade */}
-          <div className="min-h-[455px] px-2.5 py-2" style={{ background: shadeBg }}>
+          <div className="min-h-[455px] px-2.5 py-2 dark:bg-[#0d0d0d] bg-[#ebebeb]">
             {/* One UI notification card */}
-            <div className={`overflow-hidden rounded-[22px] ring-[0.5px] ${cardRing}`} style={{ background: cardBg }}>
+            <div className="overflow-hidden rounded-[22px] ring-[0.5px] dark:ring-white/8 ring-black/8 dark:bg-[#1c1c1e] bg-white">
               {/* App row */}
               <div className="flex items-center gap-1.5 px-3.5 pt-3 pb-1">
                 <div className="flex h-[15px] w-[15px] items-center justify-center rounded-[4px] bg-accent-500">
                   <span className="text-[6px] font-bold text-white leading-none">{iconLabel}</span>
                 </div>
-                <span className="flex-1 text-[10px] font-semibold" style={{ color: appName }}>Push App</span>
-                <span className="text-[9px]" style={{ color: timestamp }}>Just now</span>
-                <button type="button" className="ml-1 text-[11px]" style={{ color: closeBtn }}>✕</button>
+                <span className="flex-1 text-[10px] font-semibold dark:text-[#adadad] text-[#636366]">Push App</span>
+                <span className="text-[9px] dark:text-[#5a5a5a] text-[#8e8e93]">Just now</span>
+                <button type="button" className="ml-1 text-[11px] dark:text-[#4a4a4a] text-[#aeaeb2]">✕</button>
               </div>
               {/* Content row */}
               <div className="flex items-start gap-2.5 px-3.5 pb-3.5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold leading-snug line-clamp-1" style={{ color: titleColor }}>
+                  <p className="text-[13px] font-semibold leading-snug line-clamp-1 dark:text-white text-[#1c1c1e]">
                     {title || 'Notification title'}
                   </p>
-                  <p className="mt-0.5 text-[12px] leading-snug line-clamp-2" style={{ color: bodyColor }}>
+                  <p className="mt-0.5 text-[12px] leading-snug line-clamp-2 dark:text-[#8e8e8e] text-[#636366]">
                     {body || 'Notification body text'}
                   </p>
                 </div>
@@ -1475,12 +1432,12 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: Phon
                 <img src={imageUrl} alt="" className="sim-bigpic w-full object-cover" />
               ) : null}
             </div>
-            <p className="mt-2 text-center text-[8px]" style={{ color: swipeHint }}>swipe to dismiss</p>
+            <p className="mt-2 text-center text-[8px] dark:text-[#3a3a3a] text-[#b0b0b0]">swipe to dismiss</p>
           </div>
 
           {/* One UI gesture bar */}
-          <div className="flex justify-center pb-2.5 pt-1.5" style={{ background: gestureBg }}>
-            <div className={`h-[3.5px] w-[80px] rounded-full ${gestureBar}`} />
+          <div className="flex justify-center pb-2.5 pt-1.5 dark:bg-black bg-[#f5f5f5]">
+            <div className="h-[3.5px] w-[80px] rounded-full dark:bg-white/20 bg-black/15" />
           </div>
         </div>
       </div>
@@ -1489,25 +1446,9 @@ function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: Phon
   );
 }
 
-function IOSPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: PhonePreviewProps) {
+function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProps) {
   const iconLabel = icon.replace('ic_notif_', '').slice(0, 3).toUpperCase();
   const thumbUrl = imageUrl || leftIconUrl;
-
-  // Screen palette switches with mode
-  const screenBg    = isDark ? '#1c1c1e' : '#f2f2f7';
-  const wallpaperBg = isDark ? '#0d0d0d' : '#e8ecf2';
-  const timeColor   = isDark ? '#ffffff' : '#1c1c1e';
-  const iconFill    = isDark ? 'white' : '#1c1c1e';
-  const homeBg      = isDark ? '#1c1c1e' : '#f2f2f7';
-  const homeBar     = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(28,28,30,0.18)';
-  // Notification card: dark = frosted dark, light = frosted white (existing .sim-ios-notif)
-  const notifBg     = isDark ? 'rgba(50,50,52,0.88)' : undefined;
-  const notifRadius = 'rounded-[22px]';
-  const appMeta     = isDark ? '#aeaeb2' : '#8e8e93';
-  const titleColor  = isDark ? '#ffffff' : '#1c1c1e';
-  const bodyColor   = isDark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.8)';
-  // Stack peek card
-  const moreCardBg  = isDark ? 'rgba(50,50,52,0.55)' : 'rgba(255,255,255,0.50)';
 
   return (
     <div className="sim-phone-frame mx-auto">
@@ -1536,85 +1477,76 @@ function IOSPhone({ title, body, icon, leftIconUrl, imageUrl, isDark }: PhonePre
         </div>
 
         {/* Screen */}
-        <div className="overflow-hidden rounded-[2.8rem]" style={{ background: screenBg }}>
+        <div className="overflow-hidden rounded-[2.8rem] dark:bg-[#1c1c1e] bg-[#f2f2f7]">
           {/* Status bar */}
           <div className="relative flex items-center justify-between px-5 pb-1 pt-3.5">
-            <span className="text-[12px] font-semibold" style={{ color: timeColor }}>9:41</span>
+            <span className="text-[12px] font-semibold dark:text-white text-[#1c1c1e]">9:41</span>
             {/* Dynamic Island — pill, always black */}
             <div className="absolute left-1/2 top-2 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-black" />
-            <div className="flex items-center gap-[4px]">
+            <div className="flex items-center gap-[4px] dark:text-white text-[#1c1c1e]">
               <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill={iconFill} fillOpacity="0.35"/>
-                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill={iconFill} fillOpacity="0.55"/>
-                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill={iconFill} fillOpacity="0.75"/>
-                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill={iconFill}/>
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="currentColor" fillOpacity="0.35"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="currentColor" fillOpacity="0.55"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="currentColor" fillOpacity="0.75"/>
+                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="currentColor"/>
               </svg>
               <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
-                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill={iconFill}/>
-                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke={iconFill} strokeWidth="1.3" strokeLinecap="round" fill="none"/>
-                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke={iconFill} strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.45"/>
+                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="currentColor"/>
+                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.45"/>
               </svg>
               <div className="flex items-center gap-[2px]">
-                <div className="h-[9px] w-[16px] rounded-[2px] p-[1.5px]" style={{ border: `1px solid ${iconFill}88` }}>
-                  <div className="h-full w-[70%] rounded-[1px]" style={{ background: iconFill }} />
+                <div className="h-[9px] w-[16px] rounded-[2px] p-[1.5px] border dark:border-white/55 border-[#1c1c1e]/55">
+                  <div className="h-full w-[70%] rounded-[1px] dark:bg-white bg-[#1c1c1e]" />
                 </div>
-                <div className="h-[5px] w-[2px] rounded-r-sm" style={{ background: `${iconFill}72` }} />
+                <div className="h-[5px] w-[2px] rounded-r-sm dark:bg-white/45 bg-[#1c1c1e]/45" />
               </div>
             </div>
           </div>
 
           {/* Lock screen */}
-          <div className="min-h-[453px] px-3 py-3" style={{ background: wallpaperBg }}>
-            {/* iOS notification banner */}
-            <div
-              className={`overflow-hidden ${notifRadius} backdrop-blur-xl`}
-              style={notifBg ? { background: notifBg } : undefined}
-            >
-              {/* keep .sim-ios-notif class only in light mode for the CSS rule */}
-              <div className={!isDark ? 'sim-ios-notif overflow-hidden rounded-[22px]' : ''}>
-                {/* App header */}
-                <div className="flex items-center gap-2 px-3.5 pt-3 pb-1">
-                  <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded-[7px] bg-accent-500">
-                    <span className="text-[7px] font-bold text-white leading-none">{iconLabel}</span>
-                  </div>
-                  <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: appMeta }}>
-                    Push App
-                  </span>
-                  <span className="text-[10px]" style={{ color: appMeta }}>now</span>
+          <div className="min-h-[453px] px-3 py-3 dark:bg-[#0d0d0d] bg-[#e8ecf2]">
+            {/* iOS notification banner — sim-ios-notif handles bg + blur for both modes */}
+            <div className="sim-ios-notif overflow-hidden rounded-[22px]">
+              {/* App header */}
+              <div className="flex items-center gap-2 px-3.5 pt-3 pb-1">
+                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded-[7px] bg-accent-500">
+                  <span className="text-[7px] font-bold text-white leading-none">{iconLabel}</span>
                 </div>
-                {/* Notification content */}
-                <div className="flex items-start gap-2.5 px-3.5 pb-3.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-semibold leading-snug line-clamp-1" style={{ color: titleColor }}>
-                      {title || 'Notification title'}
-                    </p>
-                    <p className="mt-0.5 text-[12px] leading-snug line-clamp-2" style={{ color: bodyColor }}>
-                      {body || 'Notification body text'}
-                    </p>
-                  </div>
-                  {thumbUrl ? (
-                    <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover" />
-                  ) : (
-                    <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-accent-500/15">
-                      <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
-                    </div>
-                  )}
+                <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider dark:text-[#aeaeb2] text-[#8e8e93]">
+                  Push App
+                </span>
+                <span className="text-[10px] dark:text-[#aeaeb2] text-[#8e8e93]">now</span>
+              </div>
+              {/* Notification content */}
+              <div className="flex items-start gap-2.5 px-3.5 pb-3.5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold leading-snug line-clamp-1 dark:text-white text-[#1c1c1e]">
+                    {title || 'Notification title'}
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-snug line-clamp-2 dark:text-white/60 text-[#3c3c43]/80">
+                    {body || 'Notification body text'}
+                  </p>
                 </div>
+                {thumbUrl ? (
+                  <img src={thumbUrl} alt="" className="h-[46px] w-[46px] flex-shrink-0 rounded-[12px] object-cover" />
+                ) : (
+                  <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-[12px] bg-accent-500/15">
+                    <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Stacked second notification (iOS stack effect) */}
-            <div
-              className="mx-2 mt-[-4px] rounded-b-[18px] px-3 py-1.5 text-center text-[9px] backdrop-blur-xl"
-              style={{ background: moreCardBg, color: appMeta }}
-            >
+            <div className="sim-ios-more mx-2 mt-[-4px] rounded-b-[18px] px-3 py-1.5 text-center text-[9px] backdrop-blur-xl dark:text-[#aeaeb2] text-[#8e8e93]">
               1 more notification
             </div>
           </div>
 
           {/* Home indicator */}
-          <div className="flex justify-center pb-2.5 pt-1" style={{ background: homeBg }}>
-            <div className="h-[4px] w-[100px] rounded-full" style={{ background: homeBar }} />
+          <div className="flex justify-center pb-2.5 pt-1 dark:bg-[#1c1c1e] bg-[#f2f2f7]">
+            <div className="h-[4px] w-[100px] rounded-full dark:bg-white/[.22] bg-[#1c1c1e]/[.18]" />
           </div>
         </div>
       </div>

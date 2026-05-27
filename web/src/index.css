@@ -63,9 +63,12 @@ html.dark body {
 /* ── Phone simulator ──────────────────────────────────────────────────────── */
 .sim-phone-frame  { width: 248px; zoom: 1.8; }
 .sim-bigpic       { max-height: 120px; }
-.sim-ios-notif    {
+.sim-ios-notif {
   background: rgba(255, 255, 255, 0.88);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
-.sim-ios-more     { background: rgba(255, 255, 255, 0.50); }
+html.dark .sim-ios-notif { background: rgba(50, 50, 52, 0.88); }
+
+.sim-ios-more { background: rgba(255, 255, 255, 0.50); }
+html.dark .sim-ios-more  { background: rgba(50, 50, 52, 0.55); }
