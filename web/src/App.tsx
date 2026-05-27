@@ -98,6 +98,7 @@ export default function App() {
   const [apiUrl, setApiUrl] = useState(() => getApiBaseUrl());
   const [apiUrlEditing, setApiUrlEditing] = useState(false);
   const [apiUrlDraft, setApiUrlDraft] = useState('');
+  const [configOpen, setConfigOpen] = useState(true);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -589,9 +590,23 @@ export default function App() {
 
           <div className="mt-6 grid gap-5">
             <div className="rounded-2xl border border-bd bg-surface p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
-                Config manager
-              </p>
+              <button
+                type="button"
+                onClick={() => setConfigOpen((o) => !o)}
+                className="flex w-full items-center justify-between"
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
+                  Config manager
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-3.5 w-3.5 text-tx-muted transition-transform duration-200 ${configOpen ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {configOpen && (<>
               <div className="mt-4 grid gap-4">
                 <Field label="Name" hint="Config label">
                   <input
@@ -732,6 +747,7 @@ export default function App() {
                   ))
                 )}
               </div>
+              </>)}
             </div>
 
             <div className="rounded-2xl border border-bd bg-surface p-4">
