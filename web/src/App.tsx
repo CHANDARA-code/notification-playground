@@ -590,7 +590,7 @@ export default function App() {
                 onClick={() => setAppearanceOpen((o) => !o)}
                 className="flex w-full items-center justify-between"
               >
-                <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tx-base">
                   Appearance Notification
                 </p>
                 <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${appearanceOpen ? 'rotate-180' : ''}`} />
@@ -684,7 +684,7 @@ export default function App() {
                 onClick={() => setTargetOpen((o) => !o)}
                 className="flex w-full items-center justify-between"
               >
-                <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tx-base">
                   Target Push Notification
                 </p>
                 <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${targetOpen ? 'rotate-180' : ''}`} />
@@ -694,7 +694,7 @@ export default function App() {
                 {/* ── Topic Catalog ── */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-[0.2em] text-tx-muted">Topic Catalog</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-tx-base">Topic Catalog</p>
                     <button
                       type="button"
                       onClick={() => void loadTopics()}
@@ -781,7 +781,7 @@ export default function App() {
 
                           {expandedTopic === topic.id ? (
                             <div className="border-t border-bd px-4 py-3">
-                              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-tx-muted">
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-tx-base">
                                 Subscribe / unsubscribe FCM tokens
                               </p>
                               <InputWrap icon="users">
@@ -880,7 +880,7 @@ export default function App() {
                 onClick={() => setConfigOpen((o) => !o)}
                 className="flex w-full items-center justify-between"
               >
-                <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-tx-base">
                   Config manager
                 </p>
                 <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${configOpen ? 'rotate-180' : ''}`} />
@@ -1265,7 +1265,7 @@ function Field({
 }) {
   return (
     <label className="grid gap-2 text-sm text-tx-muted">
-      <span className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-tx-muted">
+      <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-tx-base">
         {label}
         {required ? <span className="text-accent-400">*</span> : null}
       </span>
