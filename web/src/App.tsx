@@ -99,6 +99,7 @@ export default function App() {
   const [apiUrlEditing, setApiUrlEditing] = useState(false);
   const [apiUrlDraft, setApiUrlDraft] = useState('');
   const [configOpen, setConfigOpen] = useState(true);
+  const [targetOpen, setTargetOpen] = useState(true);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -751,187 +752,198 @@ export default function App() {
             </div>
 
             <div className="rounded-2xl border border-bd bg-surface p-4">
-              <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setTargetOpen((o) => !o)}
+                className="flex w-full items-center justify-between"
+              >
                 <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
-                  Topic Catalog
+                  Target Push Notification
                 </p>
-                <button
-                  type="button"
-                  onClick={() => void loadTopics()}
-                  className="inline-flex items-center gap-1 text-xs text-tx-muted transition hover:text-tx-base"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-3.5 w-3.5 text-tx-muted transition-transform duration-200 ${targetOpen ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                 >
-                  Refresh <Ic name="refresh" />
-                </button>
-              </div>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                <input
-                  value={topicName}
-                  onChange={(e) => setTopicName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
-                  placeholder="Topic name *"
-                  className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
-                <input
-                  value={topicDesc}
-                  onChange={(e) => setTopicDesc(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
-                  placeholder="Description (optional)"
-                  className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
-                />
-                <button
-                  type="button"
-                  onClick={() => void handleCreateTopic()}
-                  disabled={!topicName.trim()}
-                  className="inline-flex items-center gap-1.5 justify-center rounded-xl bg-surface-2 px-4 py-2 text-xs font-semibold text-tx-base transition hover:bg-surface-hover disabled:opacity-40"
-                >
-                  Add <Ic name="plus" />
-                </button>
-              </div>
+              {targetOpen && (<>
+                {/* ── Topic Catalog ── */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-[0.2em] text-tx-muted">Topic Catalog</p>
+                    <button
+                      type="button"
+                      onClick={() => void loadTopics()}
+                      className="inline-flex items-center gap-1 text-xs text-tx-muted transition hover:text-tx-base"
+                    >
+                      Refresh <Ic name="refresh" />
+                    </button>
+                  </div>
 
-              {topicStatus ? (
-                <p className="mt-2 text-xs text-tx-muted">{topicStatus}</p>
-              ) : null}
+                  <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                    <input
+                      value={topicName}
+                      onChange={(e) => setTopicName(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
+                      placeholder="Topic name *"
+                      className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
+                    />
+                    <input
+                      value={topicDesc}
+                      onChange={(e) => setTopicDesc(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateTopic(); }}
+                      placeholder="Description (optional)"
+                      className="rounded-xl border border-bd bg-surface-2 px-4 py-2 text-sm text-tx-base outline-none focus:border-accent-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleCreateTopic()}
+                      disabled={!topicName.trim()}
+                      className="inline-flex items-center gap-1.5 justify-center rounded-xl bg-surface-2 px-4 py-2 text-xs font-semibold text-tx-base transition hover:bg-surface-hover disabled:opacity-40"
+                    >
+                      Add <Ic name="plus" />
+                    </button>
+                  </div>
 
-              <div className="mt-4 grid gap-2">
-                {topics.length === 0 ? (
-                  <span className="text-xs text-tx-muted">No topics yet.</span>
-                ) : (
-                  topics.map((topic) => (
-                    <div key={topic.id} className="rounded-xl border border-bd bg-surface-2">
-                      <div className="flex items-center gap-3 px-4 py-2">
-                        <input
-                          type="checkbox"
-                          id={`topic-${topic.id}`}
-                          checked={selectedTopics.has(topic.name)}
-                          onChange={() => toggleTopicSelection(topic.name)}
-                          className="h-4 w-4 cursor-pointer accent-accent-400"
-                          title={`Select ${topic.name} for broadcast`}
-                        />
-                        <label
-                          htmlFor={`topic-${topic.id}`}
-                          className="flex-1 cursor-pointer"
-                        >
-                          <span className="text-sm font-semibold text-tx-base">
-                            {topic.name}
-                          </span>
-                          {topic.description ? (
-                            <span className="ml-2 text-xs text-tx-muted">
-                              {topic.description}
-                            </span>
-                          ) : null}
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setExpandedTopic(expandedTopic === topic.id ? null : topic.id);
-                            setSubscribeTokens('');
-                            setSubscribeResult(null);
-                          }}
-                          className="inline-flex items-center gap-1 rounded-lg border border-bd px-2 py-1 text-xs text-tx-muted transition hover:border-bd-strong hover:text-tx-base"
-                        >
-                          {expandedTopic === topic.id ? 'Close' : 'Manage'}
-                          <Ic name={expandedTopic === topic.id ? 'x' : 'sliders'} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleDeleteTopic(topic.id, topic.name)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-red-500/40 px-2 py-1 text-xs text-red-300 transition hover:border-red-400"
-                        >
-                          Delete <Ic name="trash" />
-                        </button>
-                      </div>
+                  {topicStatus ? (
+                    <p className="mt-2 text-xs text-tx-muted">{topicStatus}</p>
+                  ) : null}
 
-                      {expandedTopic === topic.id ? (
-                        <div className="border-t border-bd px-4 py-3">
-                          <p className="mb-2 text-xs uppercase tracking-[0.2em] text-tx-muted">
-                            Subscribe / unsubscribe FCM tokens
-                          </p>
-                          <textarea
-                            title="FCM tokens (one per line)"
-                            placeholder="Paste FCM tokens — one per line"
-                            value={subscribeTokens}
-                            onChange={(e) => {
-                              setSubscribeTokens(e.target.value);
-                              setSubscribeResult(null);
-                            }}
-                            rows={4}
-                            className="w-full rounded-xl border border-bd bg-surface px-3 py-2 text-xs text-tx-base outline-none focus:border-accent-400"
-                          />
-                          <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-3 grid gap-2">
+                    {topics.length === 0 ? (
+                      <span className="text-xs text-tx-muted">No topics yet.</span>
+                    ) : (
+                      topics.map((topic) => (
+                        <div key={topic.id} className="rounded-xl border border-bd bg-surface-2">
+                          <div className="flex items-center gap-3 px-4 py-2">
+                            <input
+                              type="checkbox"
+                              id={`topic-${topic.id}`}
+                              checked={selectedTopics.has(topic.name)}
+                              onChange={() => toggleTopicSelection(topic.name)}
+                              className="h-4 w-4 cursor-pointer accent-accent-400"
+                              title={`Select ${topic.name} for broadcast`}
+                            />
+                            <label htmlFor={`topic-${topic.id}`} className="flex-1 cursor-pointer">
+                              <span className="text-sm font-semibold text-tx-base">{topic.name}</span>
+                              {topic.description ? (
+                                <span className="ml-2 text-xs text-tx-muted">{topic.description}</span>
+                              ) : null}
+                            </label>
                             <button
                               type="button"
-                              disabled={!subscribeTokens.trim()}
-                              onClick={() => void handleTopicTokenAction(topic.name, 'subscribe')}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-accent-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-400 disabled:opacity-40"
+                              onClick={() => {
+                                setExpandedTopic(expandedTopic === topic.id ? null : topic.id);
+                                setSubscribeTokens('');
+                                setSubscribeResult(null);
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg border border-bd px-2 py-1 text-xs text-tx-muted transition hover:border-bd-strong hover:text-tx-base"
                             >
-                              Subscribe <Ic name="link" />
+                              {expandedTopic === topic.id ? 'Close' : 'Manage'}
+                              <Ic name={expandedTopic === topic.id ? 'x' : 'sliders'} />
                             </button>
                             <button
                               type="button"
-                              disabled={!subscribeTokens.trim()}
-                              onClick={() => void handleTopicTokenAction(topic.name, 'unsubscribe')}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong disabled:opacity-40"
+                              onClick={() => void handleDeleteTopic(topic.id, topic.name)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-500/40 px-2 py-1 text-xs text-red-300 transition hover:border-red-400"
                             >
-                              Unsubscribe <Ic name="unlink" />
+                              Delete <Ic name="trash" />
                             </button>
                           </div>
-                          {subscribeResult ? (
-                            <div className="mt-2 rounded-xl border border-bd bg-surface px-3 py-2 text-xs">
-                              <span className={subscribeResult.failureCount === 0 ? 'text-green-400' : 'text-yellow-400'}>
-                                {subscribeResult.action === 'subscribe' ? 'Subscribed' : 'Unsubscribed'}{' '}
-                                {subscribeResult.successCount} token(s)
-                                {subscribeResult.failureCount > 0
-                                  ? `, ${subscribeResult.failureCount} failed`
-                                  : ''}
-                              </span>
-                              {subscribeResult.errors.length > 0 ? (
-                                <ul className="mt-1 list-disc pl-4 text-red-300">
-                                  {subscribeResult.errors.map((e) => (
-                                    <li key={e.index}>token[{e.index}]: {e.reason}</li>
-                                  ))}
-                                </ul>
+
+                          {expandedTopic === topic.id ? (
+                            <div className="border-t border-bd px-4 py-3">
+                              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-tx-muted">
+                                Subscribe / unsubscribe FCM tokens
+                              </p>
+                              <textarea
+                                title="FCM tokens (one per line)"
+                                placeholder="Paste FCM tokens — one per line"
+                                value={subscribeTokens}
+                                onChange={(e) => {
+                                  setSubscribeTokens(e.target.value);
+                                  setSubscribeResult(null);
+                                }}
+                                rows={4}
+                                className="w-full rounded-xl border border-bd bg-surface px-3 py-2 text-xs text-tx-base outline-none focus:border-accent-400"
+                              />
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  disabled={!subscribeTokens.trim()}
+                                  onClick={() => void handleTopicTokenAction(topic.name, 'subscribe')}
+                                  className="inline-flex items-center gap-1.5 rounded-xl bg-accent-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-accent-400 disabled:opacity-40"
+                                >
+                                  Subscribe <Ic name="link" />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={!subscribeTokens.trim()}
+                                  onClick={() => void handleTopicTokenAction(topic.name, 'unsubscribe')}
+                                  className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1.5 text-xs font-semibold text-tx-base transition hover:border-bd-strong disabled:opacity-40"
+                                >
+                                  Unsubscribe <Ic name="unlink" />
+                                </button>
+                              </div>
+                              {subscribeResult ? (
+                                <div className="mt-2 rounded-xl border border-bd bg-surface px-3 py-2 text-xs">
+                                  <span className={subscribeResult.failureCount === 0 ? 'text-green-400' : 'text-yellow-400'}>
+                                    {subscribeResult.action === 'subscribe' ? 'Subscribed' : 'Unsubscribed'}{' '}
+                                    {subscribeResult.successCount} token(s)
+                                    {subscribeResult.failureCount > 0 ? `, ${subscribeResult.failureCount} failed` : ''}
+                                  </span>
+                                  {subscribeResult.errors.length > 0 ? (
+                                    <ul className="mt-1 list-disc pl-4 text-red-300">
+                                      {subscribeResult.errors.map((e) => (
+                                        <li key={e.index}>token[{e.index}]: {e.reason}</li>
+                                      ))}
+                                    </ul>
+                                  ) : null}
+                                </div>
                               ) : null}
                             </div>
                           ) : null}
                         </div>
-                      ) : null}
+                      ))
+                    )}
+                  </div>
+
+                  {selectedTopics.size > 0 ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-tx-muted">Send to:</span>
+                      {[...selectedTopics].map((name) => (
+                        <span key={name} className="rounded-full bg-accent-500/20 px-3 py-0.5 text-xs text-accent-400">
+                          {name}
+                        </span>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTopics(new Set())}
+                        className="inline-flex items-center gap-1 text-xs text-tx-muted transition hover:text-tx-base"
+                      >
+                        Clear <Ic name="x" />
+                      </button>
                     </div>
-                  ))
-                )}
-              </div>
-
-              {selectedTopics.size > 0 ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-tx-muted">Send to:</span>
-                  {[...selectedTopics].map((name) => (
-                    <span
-                      key={name}
-                      className="rounded-full bg-accent-500/20 px-3 py-0.5 text-xs text-accent-400"
-                    >
-                      {name}
-                    </span>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTopics(new Set())}
-                    className="inline-flex items-center gap-1 text-xs text-tx-muted transition hover:text-tx-base"
-                  >
-                    Clear <Ic name="x" />
-                  </button>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
 
-            <Field label="FCM token">
-              <textarea
-                value={token}
-                onChange={(event) => setToken(event.target.value)}
-                rows={2}
-                placeholder="Optional if topics are selected or an active config is set"
-                className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-              />
-            </Field>
+                {/* ── FCM Token ── */}
+                <div className="mt-4 border-t border-bd pt-4">
+                  <Field label="FCM token">
+                    <textarea
+                      value={token}
+                      onChange={(event) => setToken(event.target.value)}
+                      rows={2}
+                      placeholder="Optional if topics are selected or an active config is set"
+                      className="w-full rounded-xl border border-bd bg-surface px-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                    />
+                  </Field>
+                </div>
+              </>)}
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Title" required>
