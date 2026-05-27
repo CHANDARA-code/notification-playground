@@ -664,7 +664,7 @@ export default function App() {
 
                 <div className="mt-4">
                   <Field label="Meta data" hint="Custom JSON payload">
-                    <InputWrap icon="code">
+                    <InputWrap icon="code" topAlign>
                       <textarea
                         title="Custom data JSON"
                         value={dataJson}
@@ -784,7 +784,7 @@ export default function App() {
                               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-tx-base">
                                 Subscribe / unsubscribe FCM tokens
                               </p>
-                              <InputWrap icon="users">
+                              <InputWrap icon="users" topAlign>
                                 <textarea
                                   title="FCM tokens (one per line)"
                                   placeholder="Paste FCM tokens — one per line"
@@ -860,7 +860,7 @@ export default function App() {
                 {/* ── FCM Token ── */}
                 <div className="mt-4 border-t border-bd pt-4">
                   <Field label="FCM token">
-                    <InputWrap icon="key">
+                    <InputWrap icon="key" topAlign>
                       <textarea
                         value={token}
                         onChange={(event) => setToken(event.target.value)}

@@ -65,14 +65,18 @@ export function InputWrap({
   icon,
   children,
   compact = false,
+  topAlign = false,
 }: {
   icon: string;
   children: ReactNode;
   compact?: boolean;
+  topAlign?: boolean;
 }) {
   return (
     <div className="relative">
-      <span className={`pointer-events-none absolute left-3 text-tx-muted ${compact ? 'top-1.5' : 'top-3'}`}>
+      <span className={`pointer-events-none absolute left-3 text-tx-muted ${
+        compact ? 'top-1.5' : topAlign ? 'top-3' : 'top-1/2 -translate-y-1/2'
+      }`}>
         <Ic name={icon} className={compact ? 'text-sm shrink-0' : 'text-base shrink-0'} />
       </span>
       {children}
