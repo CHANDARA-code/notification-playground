@@ -33,7 +33,7 @@ export class TopicsService {
 
   async listTopics(): Promise<TopicOutput[]> {
     const topics = getTopicsTable();
-    return this.db.select().from(topics).orderBy(topics.name) as Promise<TopicOutput[]>;
+    return (await this.db.select().from(topics).orderBy(topics.name)) as TopicOutput[];
   }
 
   async createTopic(input: TopicInput): Promise<TopicOutput> {
@@ -106,10 +106,10 @@ export class TopicsService {
     if (subscriptions.length === 0) return [];
 
     const topicIds = subscriptions.map((s) => s.topicId);
-    return this.db
+    return (await this.db
       .select()
       .from(topics)
-      .where(inArray(topics.id, topicIds)) as Promise<TopicOutput[]>;
+      .where(inArray(topics.id, topicIds))) as TopicOutput[];
   }
 
   async syncDeviceTopics(token: string, topicNames: string[]): Promise<TopicOutput[]> {
@@ -183,10 +183,10 @@ export class TopicsService {
 
     if (validIds.size === 0) return [];
 
-    return this.db
+    return (await this.db
       .select()
       .from(topics)
-      .where(inArray(topics.id, [...validIds])) as Promise<TopicOutput[]>;
+      .where(inArray(topics.id, [...validIds]))) as TopicOutput[];
   }
 
   async subscribeTokensToTopic(
