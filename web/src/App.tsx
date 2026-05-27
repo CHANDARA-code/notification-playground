@@ -2,16 +2,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   activateConfig,
-  apiBaseUrl,
   createConfig,
   createTopic,
   deleteConfig,
   deleteTopic,
+  getApiBaseUrl,
   getNotificationHistory,
   listConfigs,
   listTopics,
   type NotificationHistoryItem,
+  resetApiBaseUrl,
   sendNotification,
+  setApiBaseUrl,
   subscribeTokensToTopic,
   type Topic,
   type TopicSubscriptionResult,
@@ -93,6 +95,9 @@ export default function App() {
   const [isDark, setIsDark] = useState(
     () => document.documentElement.classList.contains('dark'),
   );
+  const [apiUrl, setApiUrl] = useState(() => getApiBaseUrl());
+  const [apiUrlEditing, setApiUrlEditing] = useState(false);
+  const [apiUrlDraft, setApiUrlDraft] = useState('');
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
@@ -371,7 +376,7 @@ export default function App() {
       try { payload.data = JSON.parse(dataJson); } catch { /* invalid json, skip */ }
     }
     const json = JSON.stringify(payload, null, 2);
-    return `curl -X POST ${apiBaseUrl}/notifications/send \\\n  -H "Content-Type: application/json" \\\n  -d '${json}'`;
+    return `curl -X POST ${apiUrl}/notifications/send \\\n  -H "Content-Type: application/json" \\\n  -d '${json}'`;
   };
 
   const buildFirebaseCurl = (): string => {
@@ -522,9 +527,64 @@ export default function App() {
 
       <main className="mt-10 grid gap-8 lg:grid-cols-[54fr_46fr]">
         <section className="glass rounded-3xl p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-tx-base">Payload</h2>
-            <span className="text-xs text-tx-muted">API: {apiBaseUrl}</span>
+            {apiUrlEditing ? (
+              <form
+                className="flex min-w-0 flex-1 items-center gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const val = apiUrlDraft.trim();
+                  setApiBaseUrl(val);
+                  setApiUrl(getApiBaseUrl());
+                  setApiUrlEditing(false);
+                }}
+              >
+                <input
+                  title="API base URL"
+                  autoFocus
+                  value={apiUrlDraft}
+                  onChange={(e) => setApiUrlDraft(e.target.value)}
+                  placeholder="http://localhost:3000"
+                  className="min-w-0 flex-1 rounded-lg border border-bd bg-surface-2 px-3 py-1 text-xs text-tx-base outline-none focus:border-accent-400"
+                />
+                <button type="submit" className="rounded-lg border border-bd px-2.5 py-1 text-xs text-tx-base transition hover:border-bd-strong">
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApiUrlEditing(false)}
+                  className="rounded-lg border border-bd px-2.5 py-1 text-xs text-tx-muted transition hover:border-bd-strong"
+                >
+                  Cancel
+                </button>
+                {localStorage.getItem('apiBaseUrl') ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetApiBaseUrl();
+                      setApiUrl(getApiBaseUrl());
+                      setApiUrlEditing(false);
+                    }}
+                    className="rounded-lg border border-red-500/40 px-2.5 py-1 text-xs text-red-400 transition hover:border-red-400"
+                  >
+                    Reset
+                  </button>
+                ) : null}
+              </form>
+            ) : (
+              <button
+                type="button"
+                title="Click to change API base URL"
+                onClick={() => { setApiUrlDraft(apiUrl); setApiUrlEditing(true); }}
+                className="flex items-center gap-1.5 rounded-lg border border-bd px-2.5 py-1 text-xs text-tx-muted transition hover:border-bd-strong hover:text-tx-base"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                {apiUrl}
+              </button>
+            )}
           </div>
 
           <div className="mt-6 grid gap-5">

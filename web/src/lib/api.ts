@@ -1,5 +1,25 @@
-export const apiBaseUrl =
+const ENV_BASE_URL: string =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+
+const STORAGE_KEY = 'apiBaseUrl';
+
+export function getApiBaseUrl(): string {
+  return localStorage.getItem(STORAGE_KEY) || ENV_BASE_URL;
+}
+
+export function setApiBaseUrl(url: string): void {
+  const trimmed = url.trim();
+  if (trimmed) {
+    localStorage.setItem(STORAGE_KEY, trimmed);
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+export function resetApiBaseUrl(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 
 export interface SendNotificationPayload {
   token?: string;
@@ -17,7 +37,7 @@ export interface SendNotificationPayload {
 }
 
 export async function sendNotification(payload: SendNotificationPayload) {
-  const response = await fetch(`${apiBaseUrl}/notifications/send`, {
+  const response = await fetch(`${getApiBaseUrl()}/notifications/send`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,7 +65,7 @@ export interface AppConfig {
 }
 
 export async function getConfig() {
-  const response = await fetch(`${apiBaseUrl}/config`);
+  const response = await fetch(`${getApiBaseUrl()}/config`);
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || 'Failed to load config');
@@ -54,7 +74,7 @@ export async function getConfig() {
 }
 
 export async function updateConfig(payload: AppConfig) {
-  const response = await fetch(`${apiBaseUrl}/config`, {
+  const response = await fetch(`${getApiBaseUrl()}/config`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -69,7 +89,7 @@ export async function updateConfig(payload: AppConfig) {
 }
 
 export async function listConfigs() {
-  const response = await fetch(`${apiBaseUrl}/configs`);
+  const response = await fetch(`${getApiBaseUrl()}/configs`);
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || 'Failed to load configs');
@@ -78,7 +98,7 @@ export async function listConfigs() {
 }
 
 export async function createConfig(payload: AppConfig) {
-  const response = await fetch(`${apiBaseUrl}/configs`, {
+  const response = await fetch(`${getApiBaseUrl()}/configs`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -93,7 +113,7 @@ export async function createConfig(payload: AppConfig) {
 }
 
 export async function updateConfigById(id: number, payload: AppConfig) {
-  const response = await fetch(`${apiBaseUrl}/configs/${id}`, {
+  const response = await fetch(`${getApiBaseUrl()}/configs/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -108,7 +128,7 @@ export async function updateConfigById(id: number, payload: AppConfig) {
 }
 
 export async function deleteConfig(id: number) {
-  const response = await fetch(`${apiBaseUrl}/configs/${id}`, {
+  const response = await fetch(`${getApiBaseUrl()}/configs/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
@@ -119,7 +139,7 @@ export async function deleteConfig(id: number) {
 }
 
 export async function activateConfig(id: number) {
-  const response = await fetch(`${apiBaseUrl}/configs/${id}/activate`, {
+  const response = await fetch(`${getApiBaseUrl()}/configs/${id}/activate`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -137,7 +157,7 @@ export interface Topic {
 }
 
 export async function listTopics(): Promise<Topic[]> {
-  const response = await fetch(`${apiBaseUrl}/topics`);
+  const response = await fetch(`${getApiBaseUrl()}/topics`);
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || 'Failed to load topics');
@@ -149,7 +169,7 @@ export async function createTopic(payload: {
   name: string;
   description?: string | null;
 }): Promise<Topic> {
-  const response = await fetch(`${apiBaseUrl}/topics`, {
+  const response = await fetch(`${getApiBaseUrl()}/topics`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -162,7 +182,7 @@ export async function createTopic(payload: {
 }
 
 export async function deleteTopic(id: number): Promise<{ deleted: boolean }> {
-  const response = await fetch(`${apiBaseUrl}/topics/${id}`, {
+  const response = await fetch(`${getApiBaseUrl()}/topics/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
@@ -182,7 +202,7 @@ export async function subscribeTokensToTopic(
   topicName: string,
   tokens: string[],
 ): Promise<TopicSubscriptionResult> {
-  const response = await fetch(`${apiBaseUrl}/topics/${encodeURIComponent(topicName)}/subscribe`, {
+  const response = await fetch(`${getApiBaseUrl()}/topics/${encodeURIComponent(topicName)}/subscribe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tokens }),
@@ -226,7 +246,7 @@ export async function getNotificationHistory(
 ): Promise<NotificationHistoryResponse> {
   const offset = (page - 1) * pageSize;
   const response = await fetch(
-    `${apiBaseUrl}/notifications/history?limit=${pageSize}&offset=${offset}`,
+    `${getApiBaseUrl()}/notifications/history?limit=${pageSize}&offset=${offset}`,
   );
   if (!response.ok) {
     const text = await response.text();
@@ -240,7 +260,7 @@ export async function unsubscribeTokensFromTopic(
   tokens: string[],
 ): Promise<TopicSubscriptionResult> {
   const response = await fetch(
-    `${apiBaseUrl}/topics/${encodeURIComponent(topicName)}/unsubscribe`,
+    `${getApiBaseUrl()}/topics/${encodeURIComponent(topicName)}/unsubscribe`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
