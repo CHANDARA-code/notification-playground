@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { desc } from 'drizzle-orm';
+import { count, desc } from 'drizzle-orm';
 import type { messaging } from 'firebase-admin';
 
 import { DB, DrizzleDb } from '@db/database.module';
@@ -150,15 +150,22 @@ export class NotificationsService {
     }
   }
 
-  async history(limit = 50) {
+  async history(limit = 20, offset = 0) {
     const notifications = getNotificationsTable();
-    const safeLimit = Math.max(1, Math.min(200, limit));
+    const safeLimit = Math.max(1, Math.min(100, limit));
+    const safeOffset = Math.max(0, offset);
 
-    return this.db
-      .select()
-      .from(notifications)
-      .orderBy(desc(notifications.createdAt))
-      .limit(safeLimit);
+    const [items, [{ total }]] = await Promise.all([
+      this.db
+        .select()
+        .from(notifications)
+        .orderBy(desc(notifications.createdAt))
+        .limit(safeLimit)
+        .offset(safeOffset),
+      this.db.select({ total: count() }).from(notifications),
+    ]);
+
+    return { items, total };
   }
 }
 

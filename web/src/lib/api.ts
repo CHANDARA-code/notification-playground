@@ -194,6 +194,47 @@ export async function subscribeTokensToTopic(
   return response.json() as Promise<TopicSubscriptionResult>;
 }
 
+export interface NotificationHistoryItem {
+  id: number;
+  token: string;
+  topic: string | null;
+  topics: string | null;
+  title: string;
+  body: string;
+  icon: string | null;
+  iconUrl: string | null;
+  leftIconUrl: string | null;
+  imageUrl: string | null;
+  data: string | null;
+  status: string;
+  priority: string;
+  androidPriority: string;
+  apnsPriority: string;
+  messageId: string | null;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface NotificationHistoryResponse {
+  items: NotificationHistoryItem[];
+  total: number;
+}
+
+export async function getNotificationHistory(
+  page = 1,
+  pageSize = 10,
+): Promise<NotificationHistoryResponse> {
+  const offset = (page - 1) * pageSize;
+  const response = await fetch(
+    `${apiBaseUrl}/notifications/history?limit=${pageSize}&offset=${offset}`,
+  );
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Failed to load notification history');
+  }
+  return response.json() as Promise<NotificationHistoryResponse>;
+}
+
 export async function unsubscribeTokensFromTopic(
   topicName: string,
   tokens: string[],

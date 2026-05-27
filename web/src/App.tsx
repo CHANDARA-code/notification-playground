@@ -7,8 +7,10 @@ import {
   createTopic,
   deleteConfig,
   deleteTopic,
+  getNotificationHistory,
   listConfigs,
   listTopics,
+  type NotificationHistoryItem,
   sendNotification,
   subscribeTokensToTopic,
   type Topic,
@@ -78,6 +80,14 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [lastResponse, setLastResponse] = useState<object | null>(null);
   const [copiedCurl, setCopiedCurl] = useState<'api' | 'firebase' | null>(null);
+  const [simPlatform, setSimPlatform] = useState<'android' | 'ios'>('android');
+
+  const HIST_PAGE_SIZE = 10;
+  const [histItems, setHistItems] = useState<NotificationHistoryItem[]>([]);
+  const [histTotal, setHistTotal] = useState(0);
+  const [histPage, setHistPage] = useState(1);
+  const [histLoading, setHistLoading] = useState(false);
+  const [histError, setHistError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(
     () => document.documentElement.classList.contains('dark'),
   );
@@ -219,6 +229,7 @@ export default function App() {
   useEffect(() => {
     void loadConfigs();
     void loadTopics();
+    void loadHistory(1);
   }, []);
 
   const handleSaveConfig = async () => {
@@ -289,6 +300,51 @@ export default function App() {
         err instanceof Error ? err.message : 'Failed to delete config.',
       );
     }
+  };
+
+  const loadHistory = async (page: number) => {
+    setHistLoading(true);
+    setHistError(null);
+    try {
+      const res = await getNotificationHistory(page, HIST_PAGE_SIZE);
+      setHistItems(res.items);
+      setHistTotal(res.total);
+      setHistPage(page);
+    } catch (err) {
+      setHistError(err instanceof Error ? err.message : 'Failed to load history');
+    } finally {
+      setHistLoading(false);
+    }
+  };
+
+  const handleDuplicate = (item: NotificationHistoryItem) => {
+    setToken(item.token ?? '');
+    setTitle(item.title);
+    setBody(item.body);
+    setIcon(iconOptions.includes(item.icon ?? '') ? (item.icon as string) : iconOptions[0]);
+    setLeftIconUrl(item.leftIconUrl ?? item.iconUrl ?? '');
+    setImageUrl(item.imageUrl ?? '');
+
+    if (item.data) {
+      try {
+        setDataJson(JSON.stringify(JSON.parse(item.data), null, 2));
+      } catch {
+        setDataJson('{}');
+      }
+    } else {
+      setDataJson('{}');
+    }
+
+    try {
+      const topicList: string[] = item.topics ? JSON.parse(item.topics) : [];
+      setSelectedTopics(new Set(topicList.length ? topicList : item.topic ? [item.topic] : []));
+    } catch {
+      setSelectedTopics(item.topic ? new Set([item.topic]) : new Set());
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setStatus('Loaded from history — edit and resend.');
+    setError(null);
   };
 
   const buildEffectiveTopics = (): string[] => {
@@ -453,7 +509,7 @@ export default function App() {
         </p>
       </header>
 
-      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[70%_30%]">
+      <main className="mx-auto mt-10 grid max-w-6xl gap-8 lg:grid-cols-[54%_46%]">
         <section className="glass rounded-3xl p-6 shadow-glow">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-tx-base">Payload</h2>
@@ -895,41 +951,117 @@ export default function App() {
         </section>
 
         <section className="glass rounded-3xl p-6">
-          <h2 className="text-lg font-semibold text-tx-base">Preview</h2>
-          <div className="mt-5 rounded-2xl border border-bd bg-surface p-5">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-500/20 text-sm font-semibold text-accent-400">
-                {icon.replace('ic_notif_', '').slice(0, 4).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-base font-semibold text-tx-base">{title}</p>
-                <p className="mt-1 text-sm text-tx-muted">{body}</p>
-                {imageUrl ? (
-                  <p className="mt-3 text-xs text-tx-muted">{imageUrl}</p>
-                ) : null}
-              </div>
+          {/* Platform tab switcher */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-tx-base">Simulator</h2>
+            <div className="flex rounded-xl border border-bd bg-surface-2 p-0.5 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setSimPlatform('android')}
+                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'android' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
+              >
+                Android
+              </button>
+              <button
+                type="button"
+                onClick={() => setSimPlatform('ios')}
+                className={`rounded-lg px-3 py-1.5 transition ${simPlatform === 'ios' ? 'bg-surface shadow text-tx-base' : 'text-tx-muted hover:text-tx-base'}`}
+              >
+                iOS
+              </button>
             </div>
           </div>
 
-          <div className="mt-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
-              Data payload
-            </p>
-            <pre className="mt-3 max-h-48 overflow-auto rounded-2xl bg-surface p-4 text-xs text-tx-base">
-              {JSON.stringify(preview, null, 2)}
-            </pre>
+          <div className="mt-5">
+            {simPlatform === 'android' ? (
+              <AndroidPhone
+                title={title}
+                body={body}
+                icon={icon}
+                leftIconUrl={leftIconUrl}
+                imageUrl={imageUrl}
+              />
+            ) : (
+              <IOSPhone
+                title={title}
+                body={body}
+                icon={icon}
+                leftIconUrl={leftIconUrl}
+                imageUrl={imageUrl}
+              />
+            )}
           </div>
 
           <div className="mt-6">
             <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
               Last response
             </p>
-            <pre className="mt-3 max-h-48 overflow-auto rounded-2xl bg-surface p-4 text-xs text-tx-base">
+            <pre className="mt-3 max-h-40 overflow-auto rounded-2xl bg-surface p-4 text-xs text-tx-base">
               {lastResponse ? JSON.stringify(lastResponse, null, 2) : '—'}
             </pre>
           </div>
         </section>
       </main>
+
+      {/* ── Notification History ─────────────────────────────────────────── */}
+      <section className="mx-auto mt-8 max-w-6xl pb-16">
+        <div className="glass rounded-3xl p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-tx-base">Notification History</h2>
+              {histTotal > 0 ? (
+                <p className="mt-0.5 text-xs text-tx-muted">{histTotal} total</p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadHistory(histPage)}
+              disabled={histLoading}
+              className="text-xs text-tx-muted transition hover:text-tx-base disabled:opacity-40"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {histLoading ? (
+            <p className="mt-6 text-center text-sm text-tx-muted">Loading…</p>
+          ) : histError ? (
+            <p className="mt-6 text-center text-sm text-red-400">{histError}</p>
+          ) : histItems.length === 0 ? (
+            <p className="mt-6 text-center text-sm text-tx-muted">No notifications sent yet.</p>
+          ) : (
+            <div className="mt-4 grid gap-3">
+              {histItems.map((item) => (
+                <HistoryCard key={item.id} item={item} onDuplicate={handleDuplicate} />
+              ))}
+            </div>
+          )}
+
+          {histTotal > HIST_PAGE_SIZE ? (
+            <div className="mt-5 flex items-center justify-between">
+              <button
+                type="button"
+                disabled={histPage <= 1 || histLoading}
+                onClick={() => void loadHistory(histPage - 1)}
+                className="rounded-xl border border-bd px-4 py-2 text-xs font-semibold text-tx-base transition hover:border-bd-strong disabled:opacity-40"
+              >
+                ← Prev
+              </button>
+              <span className="text-xs text-tx-muted">
+                Page {histPage} of {Math.ceil(histTotal / HIST_PAGE_SIZE)}
+              </span>
+              <button
+                type="button"
+                disabled={histPage >= Math.ceil(histTotal / HIST_PAGE_SIZE) || histLoading}
+                onClick={() => void loadHistory(histPage + 1)}
+                className="rounded-xl border border-bd px-4 py-2 text-xs font-semibold text-tx-base transition hover:border-bd-strong disabled:opacity-40"
+              >
+                Next →
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </section>
     </div>
   );
 }
@@ -954,5 +1086,304 @@ function Field({
       {children}
       {hint ? <span className="text-xs text-tx-muted">{hint}</span> : null}
     </label>
+  );
+}
+
+// ── Notification History Card ─────────────────────────────────────────────────
+
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  return `${Math.floor(hr / 24)}d ago`;
+}
+
+function HistoryCard({
+  item,
+  onDuplicate,
+}: {
+  item: NotificationHistoryItem;
+  onDuplicate: (item: NotificationHistoryItem) => void;
+}) {
+  const isSent = item.status === 'sent';
+
+  let target = '';
+  if (item.topics) {
+    try {
+      const list: string[] = JSON.parse(item.topics);
+      target = list.join(', ');
+    } catch {
+      target = item.topics;
+    }
+  } else if (item.topic) {
+    target = item.topic;
+  } else if (item.token) {
+    target = `${item.token.slice(0, 24)}…`;
+  }
+
+  return (
+    <div className="rounded-2xl border border-bd bg-surface-2 px-4 py-3">
+      <div className="flex items-start gap-3">
+        <span
+          className={`mt-0.5 flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+            isSent ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'
+          }`}
+        >
+          {item.status}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-tx-base">{item.title}</p>
+          <p className="mt-0.5 truncate text-xs text-tx-muted">{item.body}</p>
+          {target ? (
+            <p className="mt-1 truncate text-[10px] text-tx-muted">→ {target}</p>
+          ) : null}
+          {item.error ? (
+            <p className="mt-1 truncate text-[10px] text-red-400">{item.error}</p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-shrink-0 flex-col items-end gap-2">
+          <span className="text-[10px] text-tx-muted">{formatRelativeTime(item.createdAt)}</span>
+          <button
+            type="button"
+            onClick={() => onDuplicate(item)}
+            className="rounded-lg border border-bd px-2.5 py-1 text-[10px] font-semibold text-tx-base transition hover:border-bd-strong"
+          >
+            Duplicate
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Notification Simulators ───────────────────────────────────────────────────
+
+interface PhonePreviewProps {
+  title: string;
+  body: string;
+  icon: string;
+  leftIconUrl: string;
+  imageUrl: string;
+}
+
+function AndroidPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProps) {
+  const iconLabel = icon.replace('ic_notif_', '').slice(0, 3).toUpperCase();
+
+  return (
+    <div className="sim-phone-frame mx-auto">
+      {/* Phone body */}
+      <div className="relative rounded-[2.8rem] bg-[#0a0a0a] p-[10px] shadow-2xl ring-1 ring-white/10">
+        {/* Volume / power buttons */}
+        <div className="absolute -left-[3px] top-[72px] h-7 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -left-[3px] top-[108px] h-10 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -left-[3px] top-[152px] h-10 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -right-[3px] top-[108px] h-14 w-[3px] rounded-r-sm bg-[#2a2a2a]" />
+
+        {/* Screen */}
+        <div className="overflow-hidden rounded-[2.2rem] bg-[#121212]">
+          {/* Status bar */}
+          <div className="flex items-center justify-between bg-[#0d0d0d] px-5 py-2">
+            <span className="text-[11px] font-semibold text-white">12:00</span>
+            <div className="flex items-center gap-[5px]">
+              {/* Signal bars */}
+              <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="white" fillOpacity="0.5"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="white" fillOpacity="0.7"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="white" fillOpacity="0.9"/>
+                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="white"/>
+              </svg>
+              {/* WiFi */}
+              <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
+                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="white"/>
+                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.6"/>
+              </svg>
+              {/* Battery */}
+              <div className="flex items-center gap-[2px]">
+                <div className="h-[9px] w-[16px] rounded-[2px] border border-white/60 p-[1.5px]">
+                  <div className="h-full w-[70%] rounded-[1px] bg-white" />
+                </div>
+                <div className="h-[5px] w-[2px] rounded-r-sm bg-white/60" />
+              </div>
+            </div>
+          </div>
+
+          {/* Notification shade area */}
+          <div className="min-h-[360px] bg-[#121212] px-3 py-2">
+            {/* Notification card — always dark (Android shade) */}
+            <div className="overflow-hidden rounded-[18px] bg-[#1e1e1e] shadow-lg">
+              {/* Card header */}
+              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1">
+                {/* Small mono icon */}
+                <div className="flex h-[14px] w-[14px] items-center justify-center rounded-[3px] bg-accent-500">
+                  <span className="text-[6px] font-bold text-white leading-none">{iconLabel}</span>
+                </div>
+                <span className="flex-1 text-[10px] font-medium text-[#aaa]">Push App</span>
+                <span className="text-[9px] text-[#666]">Just now</span>
+                <span className="ml-1 text-[11px] text-[#555]">✕</span>
+              </div>
+
+              {/* Card body */}
+              <div className="flex items-start gap-2 px-3 pb-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold leading-snug text-white line-clamp-1">
+                    {title || 'Notification title'}
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-snug text-[#999] line-clamp-2">
+                    {body || 'Notification body text'}
+                  </p>
+                </div>
+                {/* Large icon (circular) */}
+                {leftIconUrl ? (
+                  <img
+                    src={leftIconUrl}
+                    alt=""
+                    className="h-[46px] w-[46px] flex-shrink-0 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-[46px] w-[46px] flex-shrink-0 items-center justify-center rounded-xl bg-accent-500/20">
+                    <span className="text-[13px] font-bold text-accent-400">{iconLabel}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Big picture (BigPictureStyle) */}
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="sim-bigpic w-full object-cover"
+                />
+              ) : null}
+            </div>
+
+            {/* Subtle "swipe to dismiss" hint */}
+            <p className="mt-2 text-center text-[9px] text-[#444]">swipe to dismiss</p>
+          </div>
+
+          {/* Nav bar */}
+          <div className="flex items-center justify-around bg-[#0d0d0d] px-8 py-2.5">
+            {/* Back */}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 3L5 8l5 5" stroke="#666" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {/* Home circle */}
+            <div className="h-4 w-4 rounded-full border border-[#666]" />
+            {/* Recents */}
+            <div className="h-3 w-3 rounded-[2px] border border-[#666]" />
+          </div>
+        </div>
+      </div>
+      <p className="mt-2 text-center text-[10px] text-tx-muted">Android</p>
+    </div>
+  );
+}
+
+function IOSPhone({ title, body, icon, leftIconUrl, imageUrl }: PhonePreviewProps) {
+  const iconLabel = icon.replace('ic_notif_', '').slice(0, 3).toUpperCase();
+  const thumbUrl = imageUrl || leftIconUrl;
+
+  return (
+    <div className="sim-phone-frame mx-auto">
+      {/* Phone body */}
+      <div className="relative rounded-[3.2rem] bg-[#0a0a0a] p-[10px] shadow-2xl ring-1 ring-white/10">
+        {/* Silent switch + volume + power */}
+        <div className="absolute -left-[3px] top-[64px] h-5 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -left-[3px] top-[98px] h-9 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -left-[3px] top-[142px] h-9 w-[3px] rounded-l-sm bg-[#2a2a2a]" />
+        <div className="absolute -right-[3px] top-[108px] h-14 w-[3px] rounded-r-sm bg-[#2a2a2a]" />
+
+        {/* Screen — always light (iOS lock screen) */}
+        <div className="overflow-hidden rounded-[2.6rem] bg-[#f2f2f7]">
+          {/* Status bar */}
+          <div className="relative flex items-center justify-between px-6 pb-1 pt-3">
+            <span className="text-[13px] font-semibold text-[#1c1c1e]">9:41</span>
+            {/* Dynamic Island */}
+            <div className="absolute left-1/2 top-2 h-[18px] w-[80px] -translate-x-1/2 rounded-full bg-black" />
+            <div className="flex items-center gap-1 text-[#1c1c1e]">
+              {/* Signal */}
+              <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                <rect x="0" y="5" width="2.5" height="4" rx="0.5" fill="#1c1c1e" fillOpacity="0.4"/>
+                <rect x="3.2" y="3" width="2.5" height="6" rx="0.5" fill="#1c1c1e" fillOpacity="0.6"/>
+                <rect x="6.4" y="1.5" width="2.5" height="7.5" rx="0.5" fill="#1c1c1e" fillOpacity="0.8"/>
+                <rect x="9.6" y="0" width="2.5" height="9" rx="0.5" fill="#1c1c1e"/>
+              </svg>
+              {/* WiFi */}
+              <svg width="12" height="9" viewBox="0 0 14 11" fill="none">
+                <path d="M7 9.5a1 1 0 110 2 1 1 0 010-2z" fill="#1c1c1e"/>
+                <path d="M3.5 6.5C4.8 5.3 6 4.7 7 4.7s2.2.6 3.5 1.8" stroke="#1c1c1e" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                <path d="M1 3.8C3 1.8 5 .7 7 .7s4 1.1 6 3.1" stroke="#1c1c1e" strokeWidth="1.3" strokeLinecap="round" fill="none" strokeOpacity="0.5"/>
+              </svg>
+              {/* Battery */}
+              <div className="flex items-center gap-[2px]">
+                <div className="h-[9px] w-[16px] rounded-[2px] border border-[#1c1c1e]/60 p-[1.5px]">
+                  <div className="h-full w-[70%] rounded-[1px] bg-[#1c1c1e]" />
+                </div>
+                <div className="h-[5px] w-[2px] rounded-r-sm bg-[#1c1c1e]/50" />
+              </div>
+            </div>
+          </div>
+
+          {/* Lock screen content */}
+          <div className="min-h-[360px] bg-[#f2f2f7] px-3 py-3">
+            {/* iOS notification banner — frosted glass pill */}
+            <div className="sim-ios-notif overflow-hidden rounded-[18px] shadow-lg">
+              {/* App header row */}
+              <div className="flex items-center gap-2 px-3 pt-2.5 pb-1">
+                {/* App icon */}
+                <div className="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-[6px] bg-accent-500">
+                  <span className="text-[7px] font-bold text-white leading-none">{iconLabel}</span>
+                </div>
+                <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider text-[#8e8e93]">
+                  Push App
+                </span>
+                <span className="text-[10px] text-[#8e8e93]">now</span>
+              </div>
+
+              {/* Notification content */}
+              <div className="flex items-start gap-2 px-3 pb-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold leading-snug text-[#1c1c1e] line-clamp-1">
+                    {title || 'Notification title'}
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-snug text-[#3c3c43] line-clamp-2">
+                    {body || 'Notification body text'}
+                  </p>
+                </div>
+                {/* Thumbnail (image > leftIcon) */}
+                {thumbUrl ? (
+                  <img
+                    src={thumbUrl}
+                    alt=""
+                    className="h-[44px] w-[44px] flex-shrink-0 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-[44px] w-[44px] flex-shrink-0 items-center justify-center rounded-xl bg-accent-500/15">
+                    <span className="text-[13px] font-bold text-accent-500">{iconLabel}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* More notifications placeholder */}
+            <div className="sim-ios-more mt-2 rounded-2xl px-3 py-2 text-center text-[9px] text-[#8e8e93]">
+              1 more notification
+            </div>
+          </div>
+
+          {/* Home indicator */}
+          <div className="bg-[#f2f2f7] pb-2 pt-1 flex justify-center">
+            <div className="h-[4px] w-28 rounded-full bg-[#1c1c1e]/20" />
+          </div>
+        </div>
+      </div>
+      <p className="mt-2 text-center text-[10px] text-tx-muted">iOS</p>
+    </div>
   );
 }

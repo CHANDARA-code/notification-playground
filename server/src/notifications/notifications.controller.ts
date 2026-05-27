@@ -36,10 +36,15 @@ export class NotificationsController {
   }
 
   @Get('history')
-  async history(@Query('limit') limit?: string) {
-    const parsed = limit ? Number(limit) : undefined;
+  async history(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const parsedLimit = Number(limit);
+    const parsedOffset = Number(offset);
     return this.notificationsService.history(
-      Number.isFinite(parsed) ? (parsed as number) : 50,
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 10,
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0,
     );
   }
 }
