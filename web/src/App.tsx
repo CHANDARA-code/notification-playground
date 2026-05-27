@@ -587,163 +587,94 @@ export default function App() {
             <div className="rounded-2xl border border-bd bg-surface p-4">
               <button
                 type="button"
-                onClick={() => setConfigOpen((o) => !o)}
+                onClick={() => setAppearanceOpen((o) => !o)}
                 className="flex w-full items-center justify-between"
               >
                 <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
-                  Config manager
+                  Appearance Notification
                 </p>
-                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${configOpen ? 'rotate-180' : ''}`} />
+                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${appearanceOpen ? 'rotate-180' : ''}`} />
               </button>
-              {configOpen && (<>
-              <div className="mt-4 grid gap-4">
-                <Field label="Name" hint="Config label">
-                  <InputWrap icon="tag">
-                    <input
-                      title="Config name"
-                      value={configName}
-                      onChange={(event) => setConfigName(event.target.value)}
-                      className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                    />
-                  </InputWrap>
-                </Field>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Topics" hint="Comma separated (e.g. ahaha, test, ios, android, all)">
-                    <InputWrap icon="hash">
+
+              {appearanceOpen && (<>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <Field label="Title" required>
+                    <InputWrap icon="text">
                       <input
-                        title="Topics"
-                        value={configTopics}
-                        onChange={(event) => setConfigTopics(event.target.value)}
+                        title="Notification title"
+                        value={title}
+                        onChange={(event) => setTitle(event.target.value)}
                         className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
                       />
                     </InputWrap>
                   </Field>
-                  <Field label="Android priority" hint="FCM Android priority">
-                    <InputWrap icon="phone">
-                      <select
-                        title="Android priority"
-                        value={configAndroidPriority}
-                        onChange={(event) =>
-                          setConfigAndroidPriority(
-                            event.target.value as ConfigPriority,
-                          )
-                        }
+                  <Field label="Body" required>
+                    <InputWrap icon="chat">
+                      <input
+                        title="Notification body"
+                        value={body}
+                        onChange={(event) => setBody(event.target.value)}
                         className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      >
-                        <option value="high">high</option>
-                        <option value="normal">normal</option>
-                      </select>
-                    </InputWrap>
-                  </Field>
-                  <Field label="iOS priority" hint="APNs priority">
-                    <InputWrap icon="phone">
-                      <select
-                        title="iOS priority"
-                        value={configApnsPriority}
-                        onChange={(event) =>
-                          setConfigApnsPriority(
-                            event.target.value as ConfigPriority,
-                          )
-                        }
-                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      >
-                        <option value="high">high</option>
-                        <option value="normal">normal</option>
-                      </select>
+                      />
                     </InputWrap>
                   </Field>
                 </div>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleSaveConfig}
-                  className="inline-flex items-center gap-1.5 justify-center rounded-xl bg-surface-2 px-4 py-2 text-xs font-semibold text-tx-base transition hover:bg-surface-hover"
-                >
-                  {editingId ? 'Update config' : 'Create config'} <Ic name="check" />
-                </button>
-                {editingId ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingId(null);
-                      setConfigName('');
-                      setConfigTopics('');
-                      setConfigAndroidPriority('high');
-                      setConfigApnsPriority('high');
-                    }}
-                    className="inline-flex items-center gap-1.5 justify-center rounded-xl border border-bd px-4 py-2 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
-                  >
-                    Cancel <Ic name="x" />
-                  </button>
-                ) : null}
-                {configStatus ? (
-                  <span className="text-xs text-tx-muted">{configStatus}</span>
-                ) : null}
-              </div>
 
-              <div className="mt-4 grid gap-3">
-                {configs.length === 0 ? (
-                  <span className="text-xs text-tx-muted">
-                    No configs yet.
-                  </span>
-                ) : (
-                  configs.map((config) => (
-                    <div
-                      key={config.id}
-                      className="rounded-2xl border border-bd bg-surface-2 px-4 py-3"
-                    >
-                      <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-tx-base">
-                          {config.name ?? 'Untitled'}
-                        </p>
-                        <p className="text-xs text-tx-muted">
-                          Topics:{' '}
-                          {config.topics && config.topics.length > 0
-                            ? config.topics.join(', ')
-                            : config.topic || '—'}{' '}
-                          • Android:{' '}
-                          {config.androidPriority ??
-                            config.priority ??
-                            'high'}{' '}
-                          • iOS:{' '}
-                          {config.apnsPriority ?? config.priority ?? 'high'}
-                        </p>
-                      </div>
-                        {config.isActive === 1 ? (
-                          <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs text-accent-400">
-                            Active
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleEditConfig(config)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1 text-xs text-tx-base transition hover:border-bd-strong"
-                        >
-                          Edit <Ic name="pencil" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleActivate(config.id)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1 text-xs text-tx-base transition hover:border-bd-strong"
-                        >
-                          Activate <Ic name="bolt" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(config.id)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/50 px-3 py-1 text-xs text-red-300 transition hover:border-red-400"
-                        >
-                          Delete <Ic name="trash" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  <Field label="Small icon" hint="Must be a bundled drawable">
+                    <InputWrap icon="swatch">
+                      <select
+                        title="Small icon"
+                        value={icon}
+                        onChange={(event) => setIcon(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      >
+                        {iconOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </InputWrap>
+                  </Field>
+                  <Field label="Left icon URL" hint="Large icon image (URL)">
+                    <InputWrap icon="photo">
+                      <input
+                        title="Left icon URL"
+                        value={leftIconUrl}
+                        onChange={(event) => setLeftIconUrl(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
+
+                <div className="mt-4">
+                  <Field label="Image URL" hint="Optional big picture">
+                    <InputWrap icon="photo">
+                      <input
+                        title="Image URL"
+                        value={imageUrl}
+                        onChange={(event) => setImageUrl(event.target.value)}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
+
+                <div className="mt-4">
+                  <Field label="Meta data" hint="Custom JSON payload">
+                    <InputWrap icon="code">
+                      <textarea
+                        title="Custom data JSON"
+                        value={dataJson}
+                        onChange={(event) => setDataJson(event.target.value)}
+                        rows={5}
+                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                      />
+                    </InputWrap>
+                  </Field>
+                </div>
               </>)}
             </div>
 
@@ -946,94 +877,163 @@ export default function App() {
             <div className="rounded-2xl border border-bd bg-surface p-4">
               <button
                 type="button"
-                onClick={() => setAppearanceOpen((o) => !o)}
+                onClick={() => setConfigOpen((o) => !o)}
                 className="flex w-full items-center justify-between"
               >
                 <p className="text-xs uppercase tracking-[0.3em] text-tx-muted">
-                  Appearance Notification
+                  Config manager
                 </p>
-                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${appearanceOpen ? 'rotate-180' : ''}`} />
+                <Ic name="chevron-down" className={`text-sm text-tx-muted transition-transform duration-200 shrink-0 ${configOpen ? 'rotate-180' : ''}`} />
               </button>
-
-              {appearanceOpen && (<>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <Field label="Title" required>
-                    <InputWrap icon="text">
+              {configOpen && (<>
+              <div className="mt-4 grid gap-4">
+                <Field label="Name" hint="Config label">
+                  <InputWrap icon="tag">
+                    <input
+                      title="Config name"
+                      value={configName}
+                      onChange={(event) => setConfigName(event.target.value)}
+                      className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
+                    />
+                  </InputWrap>
+                </Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Topics" hint="Comma separated (e.g. ahaha, test, ios, android, all)">
+                    <InputWrap icon="hash">
                       <input
-                        title="Notification title"
-                        value={title}
-                        onChange={(event) => setTitle(event.target.value)}
+                        title="Topics"
+                        value={configTopics}
+                        onChange={(event) => setConfigTopics(event.target.value)}
                         className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
                       />
                     </InputWrap>
                   </Field>
-                  <Field label="Body" required>
-                    <InputWrap icon="chat">
-                      <input
-                        title="Notification body"
-                        value={body}
-                        onChange={(event) => setBody(event.target.value)}
-                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      />
-                    </InputWrap>
-                  </Field>
-                </div>
-
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  <Field label="Small icon" hint="Must be a bundled drawable">
-                    <InputWrap icon="swatch">
+                  <Field label="Android priority" hint="FCM Android priority">
+                    <InputWrap icon="phone">
                       <select
-                        title="Small icon"
-                        value={icon}
-                        onChange={(event) => setIcon(event.target.value)}
+                        title="Android priority"
+                        value={configAndroidPriority}
+                        onChange={(event) =>
+                          setConfigAndroidPriority(
+                            event.target.value as ConfigPriority,
+                          )
+                        }
                         className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
                       >
-                        {iconOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
+                        <option value="high">high</option>
+                        <option value="normal">normal</option>
                       </select>
                     </InputWrap>
                   </Field>
-                  <Field label="Left icon URL" hint="Large icon image (URL)">
-                    <InputWrap icon="photo">
-                      <input
-                        title="Left icon URL"
-                        value={leftIconUrl}
-                        onChange={(event) => setLeftIconUrl(event.target.value)}
+                  <Field label="iOS priority" hint="APNs priority">
+                    <InputWrap icon="phone">
+                      <select
+                        title="iOS priority"
+                        value={configApnsPriority}
+                        onChange={(event) =>
+                          setConfigApnsPriority(
+                            event.target.value as ConfigPriority,
+                          )
+                        }
                         className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      />
+                      >
+                        <option value="high">high</option>
+                        <option value="normal">normal</option>
+                      </select>
                     </InputWrap>
                   </Field>
                 </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleSaveConfig}
+                  className="inline-flex items-center gap-1.5 justify-center rounded-xl bg-surface-2 px-4 py-2 text-xs font-semibold text-tx-base transition hover:bg-surface-hover"
+                >
+                  {editingId ? 'Update config' : 'Create config'} <Ic name="check" />
+                </button>
+                {editingId ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingId(null);
+                      setConfigName('');
+                      setConfigTopics('');
+                      setConfigAndroidPriority('high');
+                      setConfigApnsPriority('high');
+                    }}
+                    className="inline-flex items-center gap-1.5 justify-center rounded-xl border border-bd px-4 py-2 text-xs font-semibold text-tx-base transition hover:border-bd-strong"
+                  >
+                    Cancel <Ic name="x" />
+                  </button>
+                ) : null}
+                {configStatus ? (
+                  <span className="text-xs text-tx-muted">{configStatus}</span>
+                ) : null}
+              </div>
 
-                <div className="mt-4">
-                  <Field label="Image URL" hint="Optional big picture">
-                    <InputWrap icon="photo">
-                      <input
-                        title="Image URL"
-                        value={imageUrl}
-                        onChange={(event) => setImageUrl(event.target.value)}
-                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      />
-                    </InputWrap>
-                  </Field>
-                </div>
-
-                <div className="mt-4">
-                  <Field label="Meta data" hint="Custom JSON payload">
-                    <InputWrap icon="code">
-                      <textarea
-                        title="Custom data JSON"
-                        value={dataJson}
-                        onChange={(event) => setDataJson(event.target.value)}
-                        rows={5}
-                        className="w-full rounded-xl border border-bd bg-surface-2 pl-10 pr-4 py-3 text-sm text-tx-base outline-none focus:border-accent-400"
-                      />
-                    </InputWrap>
-                  </Field>
-                </div>
+              <div className="mt-4 grid gap-3">
+                {configs.length === 0 ? (
+                  <span className="text-xs text-tx-muted">
+                    No configs yet.
+                  </span>
+                ) : (
+                  configs.map((config) => (
+                    <div
+                      key={config.id}
+                      className="rounded-2xl border border-bd bg-surface-2 px-4 py-3"
+                    >
+                      <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-tx-base">
+                          {config.name ?? 'Untitled'}
+                        </p>
+                        <p className="text-xs text-tx-muted">
+                          Topics:{' '}
+                          {config.topics && config.topics.length > 0
+                            ? config.topics.join(', ')
+                            : config.topic || '—'}{' '}
+                          • Android:{' '}
+                          {config.androidPriority ??
+                            config.priority ??
+                            'high'}{' '}
+                          • iOS:{' '}
+                          {config.apnsPriority ?? config.priority ?? 'high'}
+                        </p>
+                      </div>
+                        {config.isActive === 1 ? (
+                          <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs text-accent-400">
+                            Active
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditConfig(config)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1 text-xs text-tx-base transition hover:border-bd-strong"
+                        >
+                          Edit <Ic name="pencil" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleActivate(config.id)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-bd px-3 py-1 text-xs text-tx-base transition hover:border-bd-strong"
+                        >
+                          Activate <Ic name="bolt" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(config.id)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/50 px-3 py-1 text-xs text-red-300 transition hover:border-red-400"
+                        >
+                          Delete <Ic name="trash" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
               </>)}
             </div>
 
